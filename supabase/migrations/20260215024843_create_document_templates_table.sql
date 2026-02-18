@@ -42,7 +42,7 @@ CREATE POLICY "Users can view company templates"
   TO authenticated
   USING (
     company_id IN (
-      SELECT company_id FROM profiles WHERE user_id = auth.uid()
+      SELECT company_id FROM profiles WHERE id = auth.uid()
     )
   );
 
@@ -52,7 +52,7 @@ CREATE POLICY "Users can create templates"
   TO authenticated
   WITH CHECK (
     company_id IN (
-      SELECT company_id FROM profiles WHERE user_id = auth.uid()
+      SELECT company_id FROM profiles WHERE id = auth.uid()
     )
   );
 
@@ -62,12 +62,12 @@ CREATE POLICY "Users can update company templates"
   TO authenticated
   USING (
     company_id IN (
-      SELECT company_id FROM profiles WHERE user_id = auth.uid()
+      SELECT company_id FROM profiles WHERE id = auth.uid()
     )
   )
   WITH CHECK (
     company_id IN (
-      SELECT company_id FROM profiles WHERE user_id = auth.uid()
+      SELECT company_id FROM profiles WHERE id = auth.uid()
     )
   );
 
@@ -77,7 +77,7 @@ CREATE POLICY "Users can delete company templates"
   TO authenticated
   USING (
     company_id IN (
-      SELECT company_id FROM profiles WHERE user_id = auth.uid()
+      SELECT company_id FROM profiles WHERE id = auth.uid()
     )
   );
 

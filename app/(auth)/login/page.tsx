@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
+import Link from 'next/link'
 import { Building2, Mail, Lock, ArrowRight } from 'lucide-react'
 import Image from 'next/image'
 import { APP_NAME, APP_VERSION } from '@/lib/app-config'
@@ -82,6 +83,12 @@ export default function LoginPage() {
             <p className="text-gray-500 text-base">
               Connectez-vous à votre espace
             </p>
+            <Link
+              href="/signup"
+              className="text-sm text-[#C5A572] hover:underline font-medium mt-2 inline-block"
+            >
+              Créer le premier compte admin →
+            </Link>
           </div>
 
           {/* Form */}

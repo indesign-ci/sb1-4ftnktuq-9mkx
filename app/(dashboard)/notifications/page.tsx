@@ -110,7 +110,7 @@ export default function NotificationsPage() {
       </div>
 
       <div className="flex items-center gap-4">
-        <Select value={filter} onValueChange={(value: any) => setFilter(value)}>
+        <Select value={filter} onValueChange={(value: 'all' | 'unread') => setFilter(value)}>
           <SelectTrigger className="w-48">
             <SelectValue />
           </SelectTrigger>

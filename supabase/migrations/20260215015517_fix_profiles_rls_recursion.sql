@@ -35,7 +35,7 @@ DECLARE
 BEGIN
   SELECT company_id INTO v_company_id
   FROM profiles
-  WHERE user_id = auth.uid()
+  WHERE id = auth.uid()
   LIMIT 1;
   
   RETURN v_company_id;
@@ -52,26 +52,26 @@ CREATE POLICY "Users can view own profile"
   ON profiles
   FOR SELECT
   TO authenticated
-  USING (user_id = auth.uid());
+  USING (id = auth.uid());
 
 -- SELECT: Users can view other profiles in same company
 CREATE POLICY "Users can view company profiles"
   ON profiles
   FOR SELECT
   TO authenticated
-  USING (company_id = public.get_user_company_id() AND user_id != auth.uid());
+  USING (company_id = public.get_user_company_id() AND id != auth.uid());
 
 -- UPDATE: Users can only update their own profile
 CREATE POLICY "Users can update own profile"
   ON profiles
   FOR UPDATE
   TO authenticated
-  USING (user_id = auth.uid())
-  WITH CHECK (user_id = auth.uid());
+  USING (id = auth.uid())
+  WITH CHECK (id = auth.uid());
 
 -- INSERT: Users can insert their own profile
 CREATE POLICY "Users can insert own profile"
   ON profiles
   FOR INSERT
   TO authenticated
-  WITH CHECK (user_id = auth.uid());
+  WITH CHECK (id = auth.uid());

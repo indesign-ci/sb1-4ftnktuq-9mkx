@@ -67,6 +67,9 @@ export function useNotifications() {
         .limit(50)
 
       if (error) {
+        if (process.env.NODE_ENV === 'development') {
+          console.error('[Notifications]', error)
+        }
         toast.error('Erreur lors du chargement des notifications')
         setNotifications([])
         setUnreadCount(0)
@@ -75,7 +78,10 @@ export function useNotifications() {
 
       setNotifications(data || [])
       setUnreadCount((data || []).filter((n: Notification) => !n.is_read).length)
-    } catch {
+    } catch (err) {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('[Notifications]', err)
+      }
       toast.error('Erreur lors du chargement des notifications')
       setNotifications([])
       setUnreadCount(0)

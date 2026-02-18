@@ -71,13 +71,13 @@ function mapUser(u: User | null): AuthUser | null {
 async function fetchProfile(userId: string): Promise<AuthProfile | null> {
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, user_id, company_id, first_name, last_name, email, role')
-    .eq('user_id', userId)
+    .select('id, company_id, first_name, last_name, email, role')
+    .eq('id', userId)
     .maybeSingle()
   if (error || !data) return null
-  // id exposé = auth user id pour created_by (référence auth.users)
+  // id = auth user id (profiles.id référence auth.users)
   return {
-    id: data.user_id ?? data.id,
+    id: data.id,
     company_id: data.company_id ?? null,
     first_name: data.first_name ?? undefined,
     last_name: data.last_name ?? undefined,

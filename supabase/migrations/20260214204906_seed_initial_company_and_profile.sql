@@ -23,24 +23,12 @@ VALUES (
 )
 ON CONFLICT (id) DO NOTHING;
 
--- Insert profile for existing user
-INSERT INTO profiles (
-  user_id,
-  company_id,
-  first_name,
-  last_name,
-  email,
-  role
-)
-VALUES (
-  'b0d38d74-27bb-4b5f-a78a-3c87490f9f4b',
-  'a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d',
-  'Admin',
-  'User',
-  'contactindesignci@gmail.com',
-  'admin'
-)
-ON CONFLICT (user_id) DO UPDATE SET
+-- Insert profile for existing user (profiles.id = auth.users.id)
+INSERT INTO profiles (id, company_id, first_name, last_name, email, role)
+SELECT u.id, 'a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d', 'Admin', 'User', 'contactindesignci@gmail.com', 'admin'
+FROM auth.users u
+WHERE u.email = 'contactindesignci@gmail.com'
+ON CONFLICT (id) DO UPDATE SET
   company_id = EXCLUDED.company_id,
   first_name = EXCLUDED.first_name,
   last_name = EXCLUDED.last_name,

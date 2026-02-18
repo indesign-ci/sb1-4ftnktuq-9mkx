@@ -108,4 +108,18 @@ Revue du code (fichiers principaux). Classement : **Critique** | **Important** |
 
 ---
 
-*Dernière mise à jour : 6.1 corrigé (toasts étendus à toutes les pages critiques + notifications). 2.1 et 2.2 partiellement traités (clients, quotes, invoices, projects, notifications ; @ts-nocheck retiré et `any` réduit sur ces fichiers). Reste à étendre le typage aux autres composants.*
+### 1.5 **next.config.js : propriété turbopack invalide** — Mineur ✅ Corrigé
+- **Fichier :** `next.config.js`
+- **Action :** `turbopack: {}` retiré (non supporté en Next.js 13.5).
+
+### 2.4 **Typages corrigés (sidebar, notifications, PWA)** — Mineur ✅ Corrigé
+- **Fichiers :** `components/layout/sidebar.tsx`, `notification-bell.tsx`, `install-pwa.tsx`, `notifications/page.tsx`
+- **Action :** `(user as any)` remplacé par typage explicite ; `Notification` importé ; `(navigator as any).standalone` typé ; `onValueChange` typé.
+
+### 3.2 **Manifest PWA** — Mineur ✅ Corrigé
+- **Fichier :** `public/manifest.json`
+- **Action :** `DecoProManager` remplacé par `INDESIGN PLUS PRO`.
+
+---
+
+*Dernière mise à jour : Scan complet. Corrections : next.config (turbopack), sidebar/notification-bell/install-pwa typages, manifest marque, tsconfig include. 2.1 et 2.2 partiellement traités. Reste à étendre le typage (retirer @ts-nocheck) aux autres composants.*

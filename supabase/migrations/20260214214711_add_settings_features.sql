@@ -78,7 +78,7 @@ CREATE POLICY "Users can view categories from their company"
   TO authenticated
   USING (
     company_id IN (
-      SELECT company_id FROM profiles WHERE user_id = auth.uid()
+      SELECT company_id FROM profiles WHERE id = auth.uid()
     )
   );
 
@@ -88,7 +88,7 @@ CREATE POLICY "Admins can insert categories"
   WITH CHECK (
     company_id IN (
       SELECT company_id FROM profiles 
-      WHERE user_id = auth.uid() AND role = 'admin'
+      WHERE id = auth.uid() AND role = 'admin'
     )
   );
 
@@ -98,13 +98,13 @@ CREATE POLICY "Admins can update categories"
   USING (
     company_id IN (
       SELECT company_id FROM profiles 
-      WHERE user_id = auth.uid() AND role = 'admin'
+      WHERE id = auth.uid() AND role = 'admin'
     )
   )
   WITH CHECK (
     company_id IN (
       SELECT company_id FROM profiles 
-      WHERE user_id = auth.uid() AND role = 'admin'
+      WHERE id = auth.uid() AND role = 'admin'
     )
   );
 
@@ -114,7 +114,7 @@ CREATE POLICY "Admins can delete categories"
   USING (
     company_id IN (
       SELECT company_id FROM profiles 
-      WHERE user_id = auth.uid() AND role = 'admin'
+      WHERE id = auth.uid() AND role = 'admin'
     )
   );
 

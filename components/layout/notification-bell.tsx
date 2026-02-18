@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { useNotifications, getNotificationIcon, getNotificationColor } from '@/hooks/use-notifications'
+import { useNotifications, getNotificationIcon, getNotificationColor, type Notification } from '@/hooks/use-notifications'
 import { getRelativeTime } from '@/lib/notifications/utils'
 import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
@@ -22,7 +22,7 @@ export function NotificationBell() {
   const router = useRouter()
   const [open, setOpen] = useState(false)
 
-  const handleNotificationClick = async (notification: any) => {
+  const handleNotificationClick = async (notification: Notification) => {
     if (!notification.is_read) {
       await markAsRead(notification.id)
     }

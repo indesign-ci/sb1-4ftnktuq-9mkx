@@ -26,7 +26,7 @@ CREATE POLICY "Users can view their company"
   TO authenticated
   USING (
     id IN (
-      SELECT company_id FROM profiles WHERE user_id = (select auth.uid())
+      SELECT company_id FROM profiles WHERE id = (select auth.uid())
     )
   );
 
@@ -37,12 +37,12 @@ CREATE POLICY "Admins can update their company"
   TO authenticated
   USING (
     id IN (
-      SELECT company_id FROM profiles WHERE user_id = (select auth.uid()) AND role = 'admin'
+      SELECT company_id FROM profiles WHERE id = (select auth.uid()) AND role = 'admin'
     )
   )
   WITH CHECK (
     id IN (
-      SELECT company_id FROM profiles WHERE user_id = (select auth.uid()) AND role = 'admin'
+      SELECT company_id FROM profiles WHERE id = (select auth.uid()) AND role = 'admin'
     )
   );
 
@@ -54,29 +54,29 @@ CREATE POLICY "Users can view own profile"
   ON profiles
   FOR SELECT
   TO authenticated
-  USING (user_id = (select auth.uid()));
+  USING (id = (select auth.uid()));
 
 DROP POLICY IF EXISTS "Users can view company profiles" ON profiles;
 CREATE POLICY "Users can view company profiles"
   ON profiles
   FOR SELECT
   TO authenticated
-  USING (company_id = public.get_user_company_id() AND user_id != (select auth.uid()));
+  USING (company_id = public.get_user_company_id() AND id != (select auth.uid()));
 
 DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
 CREATE POLICY "Users can update own profile"
   ON profiles
   FOR UPDATE
   TO authenticated
-  USING (user_id = (select auth.uid()))
-  WITH CHECK (user_id = (select auth.uid()));
+  USING (id = (select auth.uid()))
+  WITH CHECK (id = (select auth.uid()));
 
 DROP POLICY IF EXISTS "Users can insert own profile" ON profiles;
 CREATE POLICY "Users can insert own profile"
   ON profiles
   FOR INSERT
   TO authenticated
-  WITH CHECK (user_id = (select auth.uid()));
+  WITH CHECK (id = (select auth.uid()));
 
 -- ====================
 -- CLIENTS TABLE
@@ -303,12 +303,12 @@ CREATE POLICY "Users can manage events in their company"
   TO authenticated
   USING (
     EXISTS (
-      SELECT 1 FROM profiles WHERE user_id = (select auth.uid()) AND company_id = events.company_id
+      SELECT 1 FROM profiles WHERE id = (select auth.uid()) AND company_id = events.company_id
     )
   )
   WITH CHECK (
     EXISTS (
-      SELECT 1 FROM profiles WHERE user_id = (select auth.uid()) AND company_id = events.company_id
+      SELECT 1 FROM profiles WHERE id = (select auth.uid()) AND company_id = events.company_id
     )
   );
 
@@ -347,26 +347,26 @@ CREATE POLICY "Users can read own notifications"
   ON notifications
   FOR SELECT
   TO authenticated
-  USING (user_id = (select auth.uid()));
+  USING (id = (select auth.uid()));
 
 CREATE POLICY "Users can insert own notifications"
   ON notifications
   FOR INSERT
   TO authenticated
-  WITH CHECK (user_id = (select auth.uid()));
+  WITH CHECK (id = (select auth.uid()));
 
 CREATE POLICY "Users can update own notifications"
   ON notifications
   FOR UPDATE
   TO authenticated
-  USING (user_id = (select auth.uid()))
-  WITH CHECK (user_id = (select auth.uid()));
+  USING (id = (select auth.uid()))
+  WITH CHECK (id = (select auth.uid()));
 
 CREATE POLICY "Users can delete own notifications"
   ON notifications
   FOR DELETE
   TO authenticated
-  USING (user_id = (select auth.uid()));
+  USING (id = (select auth.uid()));
 
 -- ====================
 -- CATEGORIES TABLE
@@ -389,7 +389,7 @@ CREATE POLICY "Admins can insert categories"
   WITH CHECK (
     company_id = public.get_user_company_id()
     AND EXISTS (
-      SELECT 1 FROM profiles WHERE user_id = (select auth.uid()) AND role = 'admin'
+      SELECT 1 FROM profiles WHERE id = (select auth.uid()) AND role = 'admin'
     )
   );
 
@@ -400,13 +400,13 @@ CREATE POLICY "Admins can update categories"
   USING (
     company_id = public.get_user_company_id()
     AND EXISTS (
-      SELECT 1 FROM profiles WHERE user_id = (select auth.uid()) AND role = 'admin'
+      SELECT 1 FROM profiles WHERE id = (select auth.uid()) AND role = 'admin'
     )
   )
   WITH CHECK (
     company_id = public.get_user_company_id()
     AND EXISTS (
-      SELECT 1 FROM profiles WHERE user_id = (select auth.uid()) AND role = 'admin'
+      SELECT 1 FROM profiles WHERE id = (select auth.uid()) AND role = 'admin'
     )
   );
 
@@ -417,7 +417,7 @@ CREATE POLICY "Admins can delete categories"
   USING (
     company_id = public.get_user_company_id()
     AND EXISTS (
-      SELECT 1 FROM profiles WHERE user_id = (select auth.uid()) AND role = 'admin'
+      SELECT 1 FROM profiles WHERE id = (select auth.uid()) AND role = 'admin'
     )
   );
 
@@ -637,7 +637,7 @@ CREATE POLICY "Users can view documents in their company"
   TO authenticated
   USING (
     EXISTS (
-      SELECT 1 FROM profiles WHERE user_id = (select auth.uid()) AND company_id = professional_documents.company_id
+      SELECT 1 FROM profiles WHERE id = (select auth.uid()) AND company_id = professional_documents.company_id
     )
   );
 
@@ -647,7 +647,7 @@ CREATE POLICY "Users can create documents in their company"
   TO authenticated
   WITH CHECK (
     EXISTS (
-      SELECT 1 FROM profiles WHERE user_id = (select auth.uid()) AND company_id = professional_documents.company_id
+      SELECT 1 FROM profiles WHERE id = (select auth.uid()) AND company_id = professional_documents.company_id
     )
   );
 
@@ -657,12 +657,12 @@ CREATE POLICY "Users can update documents in their company"
   TO authenticated
   USING (
     EXISTS (
-      SELECT 1 FROM profiles WHERE user_id = (select auth.uid()) AND company_id = professional_documents.company_id
+      SELECT 1 FROM profiles WHERE id = (select auth.uid()) AND company_id = professional_documents.company_id
     )
   )
   WITH CHECK (
     EXISTS (
-      SELECT 1 FROM profiles WHERE user_id = (select auth.uid()) AND company_id = professional_documents.company_id
+      SELECT 1 FROM profiles WHERE id = (select auth.uid()) AND company_id = professional_documents.company_id
     )
   );
 
@@ -672,6 +672,6 @@ CREATE POLICY "Users can delete documents in their company"
   TO authenticated
   USING (
     EXISTS (
-      SELECT 1 FROM profiles WHERE user_id = (select auth.uid()) AND company_id = professional_documents.company_id
+      SELECT 1 FROM profiles WHERE id = (select auth.uid()) AND company_id = professional_documents.company_id
     )
   );

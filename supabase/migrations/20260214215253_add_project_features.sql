@@ -50,6 +50,26 @@
     - Add policies for company access
 */
 
+-- S'assurer que profiles et projects ont les colonnes nécessaires
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'profiles') THEN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'company_id') THEN
+      ALTER TABLE profiles ADD COLUMN company_id uuid REFERENCES companies(id) ON DELETE SET NULL;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'role') THEN
+      ALTER TABLE profiles ADD COLUMN role text;
+    END IF;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'projects') THEN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'projects' AND column_name = 'company_id') THEN
+      ALTER TABLE projects ADD COLUMN company_id uuid REFERENCES companies(id) ON DELETE CASCADE;
+      UPDATE projects SET company_id = (SELECT id FROM companies LIMIT 1) WHERE company_id IS NULL;
+    END IF;
+  END IF;
+EXCEPTION WHEN OTHERS THEN NULL;
+END $$;
+
 -- Add deleted_at to projects table
 DO $$
 BEGIN
@@ -123,7 +143,7 @@ CREATE POLICY "Users can view phases from their company projects"
   USING (
     project_id IN (
       SELECT id FROM projects WHERE company_id IN (
-        SELECT company_id FROM profiles WHERE user_id = auth.uid()
+        SELECT company_id FROM profiles WHERE id = auth.uid()
       )
     )
   );
@@ -134,7 +154,7 @@ CREATE POLICY "Users can insert phases to their company projects"
   WITH CHECK (
     project_id IN (
       SELECT id FROM projects WHERE company_id IN (
-        SELECT company_id FROM profiles WHERE user_id = auth.uid()
+        SELECT company_id FROM profiles WHERE id = auth.uid()
       )
     )
   );
@@ -145,14 +165,14 @@ CREATE POLICY "Users can update phases in their company projects"
   USING (
     project_id IN (
       SELECT id FROM projects WHERE company_id IN (
-        SELECT company_id FROM profiles WHERE user_id = auth.uid()
+        SELECT company_id FROM profiles WHERE id = auth.uid()
       )
     )
   )
   WITH CHECK (
     project_id IN (
       SELECT id FROM projects WHERE company_id IN (
-        SELECT company_id FROM profiles WHERE user_id = auth.uid()
+        SELECT company_id FROM profiles WHERE id = auth.uid()
       )
     )
   );
@@ -163,7 +183,7 @@ CREATE POLICY "Users can delete phases from their company projects"
   USING (
     project_id IN (
       SELECT id FROM projects WHERE company_id IN (
-        SELECT company_id FROM profiles WHERE user_id = auth.uid()
+        SELECT company_id FROM profiles WHERE id = auth.uid()
       )
     )
   );
@@ -175,7 +195,7 @@ CREATE POLICY "Users can view moodboards from their company projects"
   USING (
     project_id IN (
       SELECT id FROM projects WHERE company_id IN (
-        SELECT company_id FROM profiles WHERE user_id = auth.uid()
+        SELECT company_id FROM profiles WHERE id = auth.uid()
       )
     )
   );
@@ -186,7 +206,7 @@ CREATE POLICY "Users can insert moodboards to their company projects"
   WITH CHECK (
     project_id IN (
       SELECT id FROM projects WHERE company_id IN (
-        SELECT company_id FROM profiles WHERE user_id = auth.uid()
+        SELECT company_id FROM profiles WHERE id = auth.uid()
       )
     )
   );
@@ -197,14 +217,14 @@ CREATE POLICY "Users can update moodboards in their company projects"
   USING (
     project_id IN (
       SELECT id FROM projects WHERE company_id IN (
-        SELECT company_id FROM profiles WHERE user_id = auth.uid()
+        SELECT company_id FROM profiles WHERE id = auth.uid()
       )
     )
   )
   WITH CHECK (
     project_id IN (
       SELECT id FROM projects WHERE company_id IN (
-        SELECT company_id FROM profiles WHERE user_id = auth.uid()
+        SELECT company_id FROM profiles WHERE id = auth.uid()
       )
     )
   );
@@ -215,7 +235,7 @@ CREATE POLICY "Users can delete moodboards from their company projects"
   USING (
     project_id IN (
       SELECT id FROM projects WHERE company_id IN (
-        SELECT company_id FROM profiles WHERE user_id = auth.uid()
+        SELECT company_id FROM profiles WHERE id = auth.uid()
       )
     )
   );
@@ -228,7 +248,7 @@ CREATE POLICY "Users can view moodboard images from their company projects"
     moodboard_id IN (
       SELECT id FROM moodboards WHERE project_id IN (
         SELECT id FROM projects WHERE company_id IN (
-          SELECT company_id FROM profiles WHERE user_id = auth.uid()
+          SELECT company_id FROM profiles WHERE id = auth.uid()
         )
       )
     )
@@ -241,7 +261,7 @@ CREATE POLICY "Users can insert moodboard images to their company projects"
     moodboard_id IN (
       SELECT id FROM moodboards WHERE project_id IN (
         SELECT id FROM projects WHERE company_id IN (
-          SELECT company_id FROM profiles WHERE user_id = auth.uid()
+          SELECT company_id FROM profiles WHERE id = auth.uid()
         )
       )
     )
@@ -254,7 +274,7 @@ CREATE POLICY "Users can update moodboard images in their company projects"
     moodboard_id IN (
       SELECT id FROM moodboards WHERE project_id IN (
         SELECT id FROM projects WHERE company_id IN (
-          SELECT company_id FROM profiles WHERE user_id = auth.uid()
+          SELECT company_id FROM profiles WHERE id = auth.uid()
         )
       )
     )
@@ -263,7 +283,7 @@ CREATE POLICY "Users can update moodboard images in their company projects"
     moodboard_id IN (
       SELECT id FROM moodboards WHERE project_id IN (
         SELECT id FROM projects WHERE company_id IN (
-          SELECT company_id FROM profiles WHERE user_id = auth.uid()
+          SELECT company_id FROM profiles WHERE id = auth.uid()
         )
       )
     )
@@ -276,7 +296,7 @@ CREATE POLICY "Users can delete moodboard images from their company projects"
     moodboard_id IN (
       SELECT id FROM moodboards WHERE project_id IN (
         SELECT id FROM projects WHERE company_id IN (
-          SELECT company_id FROM profiles WHERE user_id = auth.uid()
+          SELECT company_id FROM profiles WHERE id = auth.uid()
         )
       )
     )
@@ -289,7 +309,7 @@ CREATE POLICY "Users can view project history from their company"
   USING (
     project_id IN (
       SELECT id FROM projects WHERE company_id IN (
-        SELECT company_id FROM profiles WHERE user_id = auth.uid()
+        SELECT company_id FROM profiles WHERE id = auth.uid()
       )
     )
   );
@@ -300,7 +320,7 @@ CREATE POLICY "Users can insert project history to their company projects"
   WITH CHECK (
     project_id IN (
       SELECT id FROM projects WHERE company_id IN (
-        SELECT company_id FROM profiles WHERE user_id = auth.uid()
+        SELECT company_id FROM profiles WHERE id = auth.uid()
       )
     )
   );

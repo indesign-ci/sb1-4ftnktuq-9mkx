@@ -20,7 +20,7 @@ export function InstallPWA() {
 
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
-    const isInStandaloneMode = (navigator as any).standalone
+    const isInStandaloneMode = !!(navigator as Navigator & { standalone?: boolean }).standalone
 
     if (isStandalone || isInStandaloneMode) {
       setIsInstalled(true)

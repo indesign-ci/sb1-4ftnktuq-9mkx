@@ -2,7 +2,8 @@
   # Update payments table
 
   1. Changes
-    - Add company_id column
+    - Add company_id and role to profiles (schéma Supabase standard) si manquants
+    - Add company_id column to payments
     - Add created_by column
     - Add updated_at column
     - Update payment_method check constraint values to French
@@ -12,6 +13,18 @@
     - Update RLS policies for company-based access
 */
 
+-- S'assurer que profiles a company_id et role (pour RLS)
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'company_id') THEN
+    ALTER TABLE profiles ADD COLUMN company_id uuid REFERENCES companies(id) ON DELETE SET NULL;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'role') THEN
+    ALTER TABLE profiles ADD COLUMN role text;
+  END IF;
+EXCEPTION WHEN undefined_table THEN NULL;
+END $$;
+
 DO $$ 
 BEGIN
   IF NOT EXISTS (
@@ -20,10 +33,17 @@ BEGIN
   ) THEN
     ALTER TABLE payments ADD COLUMN company_id uuid REFERENCES companies(id) ON DELETE CASCADE;
     
-    UPDATE payments p
-    SET company_id = i.company_id
-    FROM invoices i
-    WHERE p.invoice_id = i.id;
+    -- Remplir company_id : depuis invoices si possible, sinon depuis la 1ère entreprise
+    IF EXISTS (
+      SELECT 1 FROM information_schema.columns 
+      WHERE table_name = 'invoices' AND column_name = 'company_id'
+    ) THEN
+      UPDATE payments p
+      SET company_id = i.company_id
+      FROM invoices i
+      WHERE p.invoice_id = i.id;
+    END IF;
+    UPDATE payments SET company_id = (SELECT id FROM companies LIMIT 1) WHERE company_id IS NULL;
     
     ALTER TABLE payments ALTER COLUMN company_id SET NOT NULL;
   END IF;

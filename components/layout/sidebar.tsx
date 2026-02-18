@@ -41,14 +41,23 @@ const navigation = [
   { name: 'Paramètres', href: '/settings', icon: Settings },
 ]
 
+const ROLE_LABELS: Record<string, string> = {
+  admin: 'Admin',
+  architect: 'Architecte',
+  assistant: 'Assistante',
+  accountant: 'Comptable',
+  client: 'Client',
+}
+
 export function Sidebar() {
   const pathname = usePathname()
-  const { user, signOut, isAccountant, isClient } = useAuth()
+  const { user, profile, signOut, isAccountant, isClient, role } = useAuth()
 
-  const fullName =
-    (user as any)?.user_metadata?.full_name || 'Sophie Martin'
-  const role =
-    (user as any)?.user_metadata?.role || 'Admin'
+  const userMeta = user?.user_metadata as { full_name?: string; avatar_url?: string } | undefined
+  const fullName = profile?.first_name || profile?.last_name
+    ? [profile.first_name, profile.last_name].filter(Boolean).join(' ')
+    : userMeta?.full_name || user?.email?.split('@')[0] || 'Administrateur'
+  const roleLabel = role ? ROLE_LABELS[role] || role : 'Admin'
   const initials = fullName
     .split(' ')
     .filter(Boolean)
@@ -56,7 +65,7 @@ export function Sidebar() {
     .join('')
     .slice(0, 2)
     .toUpperCase()
-  const avatarUrl = (user as any)?.user_metadata?.avatar_url || null
+  const avatarUrl = userMeta?.avatar_url || null
 
   // Navigation visible selon le rôle
   let visibleNavigation = navigation
@@ -138,7 +147,7 @@ export function Sidebar() {
               {fullName}
             </p>
             <p className="text-xs text-gray-400 truncate capitalize">
-              {role}
+              {roleLabel}
             </p>
           </div>
         </div>

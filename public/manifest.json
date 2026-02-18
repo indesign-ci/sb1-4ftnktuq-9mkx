@@ -1,6 +1,6 @@
 {
-  "name": "DecoProManager - Gestion de Projets Décoration",
-  "short_name": "DecoProManager",
+  "name": "INDESIGN PLUS PRO - Gestion de Projets Décoration",
+  "short_name": "INDESIGN PLUS PRO",
   "description": "Application professionnelle de gestion de projets de décoration d'intérieur",
   "start_url": "/dashboard",
   "display": "standalone",
@@ -26,12 +26,6 @@
     {
       "src": "/icon-128x128.png",
       "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icon-144x144.png",
-      "sizes": "144x144",
       "type": "image/png",
       "purpose": "maskable any"
     },
