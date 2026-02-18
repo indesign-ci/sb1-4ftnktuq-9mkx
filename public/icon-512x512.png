@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fond doré avec dégradé -->
+  <defs>
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#D4AF6A;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#B39562;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="0" dy="2" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Fond principal -->
+  <rect width="512" height="512" rx="76.8" fill="url(#goldGradient)"/>
+
+  <!-- Bordure subtile -->
+  <rect x="25.6" y="25.6" width="460.8" height="460.8"
+        rx="61.44" fill="none" stroke="#FFFFFF" stroke-width="5.12" opacity="0.3"/>
+
+  <!-- Texte DPM -->
+  <text x="50%" y="50%"
+        font-family="Arial, Helvetica, sans-serif"
+        font-size="179.2"
+        font-weight="bold"
+        fill="#FFFFFF"
+        text-anchor="middle"
+        dominant-baseline="central"
+        filter="url(#shadow)">
+    DPM
+  </text>
+
+  <!-- Accent décoratif -->
+  <circle cx="435.2" cy="76.8" r="25.6" fill="#FFFFFF" opacity="0.4"/>
+  <circle cx="76.8" cy="435.2" r="15.36" fill="#FFFFFF" opacity="0.3"/>
+</svg>

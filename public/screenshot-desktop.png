@@ -1,0 +1,6 @@
+<svg width="1920" height="1080" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1920" height="1080" fill="#F5F5F5"/>
+  <text x="960" y="540" font-family="Arial" font-size="48" fill="#C5A572" text-anchor="middle">
+    DecoProManager - Tableau de bord
+  </text>
+</svg>

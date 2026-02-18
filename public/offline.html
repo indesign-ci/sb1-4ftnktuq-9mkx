@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hors ligne - DecoProManager</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
+          Arial, sans-serif;
+        background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 500px;
+        background: white;
+        border-radius: 20px;
+        padding: 60px 40px;
+        text-align: center;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+      }
+
+      .icon {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto 30px;
+        background: linear-gradient(135deg, #d4af6a 0%, #b39562 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 48px;
+        font-weight: bold;
+      }
+
+      h1 {
+        color: #1a1a1a;
+        font-size: 32px;
+        margin-bottom: 16px;
+        font-weight: 700;
+      }
+
+      p {
+        color: #666;
+        font-size: 16px;
+        line-height: 1.6;
+        margin-bottom: 12px;
+      }
+
+      .status {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #fff3cd;
+        color: #856404;
+        padding: 12px 24px;
+        border-radius: 50px;
+        margin: 30px 0;
+        font-weight: 600;
+      }
+
+      .dot {
+        width: 8px;
+        height: 8px;
+        background: #ffc107;
+        border-radius: 50%;
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.3;
+        }
+      }
+
+      .info {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 12px;
+        margin-top: 30px;
+        font-size: 14px;
+        color: #666;
+      }
+
+      .info strong {
+        color: #c5a572;
+      }
+
+      button {
+        background: linear-gradient(135deg, #d4af6a 0%, #b39562 100%);
+        color: white;
+        border: none;
+        padding: 14px 32px;
+        border-radius: 50px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(197, 165, 114, 0.3);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="icon">DPM</div>
+      <h1>Vous êtes hors ligne</h1>
+      <p>
+        Impossible de se connecter au serveur. Vérifiez votre connexion internet et
+        réessayez.
+      </p>
+
+      <div class="status">
+        <div class="dot"></div>
+        Mode hors ligne activé
+      </div>
+
+      <div class="info">
+        <strong>DecoProManager</strong> fonctionne partiellement hors ligne. Certaines
+        données récentes peuvent être disponibles en cache.
+      </div>
+
+      <button onclick="window.location.reload()">Réessayer la connexion</button>
+    </div>
+
+    <script>
+      window.addEventListener('online', () => {
+        window.location.reload()
+      })
+    </script>
+  </body>
+</html>
