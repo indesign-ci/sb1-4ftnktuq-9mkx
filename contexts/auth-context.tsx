@@ -37,7 +37,7 @@ interface AuthContextType {
   isAssistant: boolean
   isAccountant: boolean
   isClient: boolean
-  signIn: (email: string, password: string) => Promise<void>
+  signIn: (email: string, password: string, redirect?: string) => Promise<void>
   signOut: () => Promise<void>
 }
 
@@ -51,7 +51,7 @@ const AuthContext = createContext<AuthContextType>({
   isAssistant: false,
   isAccountant: false,
   isClient: false,
-  signIn: async () => {},
+  signIn: async (_email: string, _password: string, _redirect?: string) => {},
   signOut: async () => {},
 })
 
@@ -100,35 +100,64 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return
     }
     setUser(mapUser(session.user))
-    const p = await fetchProfile(session.user.id)
+    let p = await fetchProfile(session.user.id)
+    if (p && !p.company_id) {
+      try {
+        const res = await fetch('/api/ensure-admin-company', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: session.user.id }),
+        })
+        if (res.ok) p = await fetchProfile(session.user.id)
+      } catch (_) {
+        // ignore
+      }
+    }
     setProfile(p)
     setLoading(false)
   }, [])
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      loadSessionAndProfile(session)
-    }).catch((err) => {
-      const msg = err?.message ?? ''
-      if (msg.includes('Refresh Token') || msg.includes('refresh_token') || msg.includes('invalid') || err?.name === 'AuthApiError') {
-        supabase.auth.signOut().catch(() => {})
-        setUser(null)
-        setProfile(null)
-      }
-      setLoading(false)
-    })
+    let cancelled = false
+    supabase.auth.getSession()
+      .then(({ data: { session } }) => {
+        if (!cancelled) loadSessionAndProfile(session)
+      })
+      .catch((err) => {
+        if (cancelled) return
+        if (err?.name === 'AbortError' || err?.message === 'signal is aborted without reason') {
+          setLoading(false)
+          return
+        }
+        const msg = err?.message ?? ''
+        if (msg.includes('Refresh Token') || msg.includes('refresh_token') || msg.includes('invalid') || err?.name === 'AuthApiError') {
+          supabase.auth.signOut().catch(() => {})
+          setUser(null)
+          setProfile(null)
+        }
+        setLoading(false)
+      })
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      await loadSessionAndProfile(session)
+      try {
+        if (!cancelled) await loadSessionAndProfile(session)
+      } catch (err: any) {
+        if (err?.name !== 'AbortError' && err?.message !== 'signal is aborted without reason') {
+          setLoading(false)
+        }
+      }
     })
 
-    return () => subscription.unsubscribe()
+    return () => {
+      cancelled = true
+      subscription.unsubscribe()
+    }
   }, [loadSessionAndProfile])
 
   const signIn = useCallback(
-    async (email: string, password: string) => {
+    async (email: string, password: string, redirect?: string) => {
       setLoading(true)
       const { data, error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) {
@@ -136,7 +165,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error(error.message)
       }
       await loadSessionAndProfile(data.session)
-      router.push('/dashboard')
+      const target = redirect && redirect.startsWith('/') ? redirect : '/dashboard'
+      router.push(target)
     },
     [loadSessionAndProfile, router]
   )

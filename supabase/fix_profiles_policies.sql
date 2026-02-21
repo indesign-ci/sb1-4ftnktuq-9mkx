@@ -25,7 +25,10 @@ $$;
 GRANT EXECUTE ON FUNCTION public.get_user_company_id() TO authenticated;
 GRANT EXECUTE ON FUNCTION public.is_current_user_admin() TO authenticated;
 
--- 2. Supprimer les politiques existantes
+-- 2. Supprimer les politiques existantes (y compris celles en "public" trop permissives)
+DROP POLICY IF EXISTS "profiles_admin_all" ON profiles;
+DROP POLICY IF EXISTS "profiles_internal_select" ON profiles;
+DROP POLICY IF EXISTS "profiles_self_update" ON profiles;
 DROP POLICY IF EXISTS "Users can view profiles in their company" ON profiles;
 DROP POLICY IF EXISTS "Users can insert own profile" ON profiles;
 DROP POLICY IF EXISTS "Admins can insert profiles in their company" ON profiles;
@@ -90,3 +93,12 @@ CREATE POLICY "Users can update own notifications"
 CREATE POLICY "Users can delete own notifications"
   ON notifications FOR DELETE TO authenticated
   USING (auth.uid() = user_id);
+
+-- ====================
+-- COMPANIES : permettre aux admins de mettre à jour leur entreprise
+-- ====================
+DROP POLICY IF EXISTS "Admins can update their company" ON companies;
+CREATE POLICY "Admins can update their company"
+  ON companies FOR UPDATE TO authenticated
+  USING (id = public.get_user_company_id() AND public.is_current_user_admin())
+  WITH CHECK (id = public.get_user_company_id() AND public.is_current_user_admin());

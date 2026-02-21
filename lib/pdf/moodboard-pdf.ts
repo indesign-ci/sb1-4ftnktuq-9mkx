@@ -41,7 +41,7 @@ export async function generateMoodboardPDF({ moodboard, company }: MoodboardPDFO
 
   const addWatermark = () => {
     pdf.saveGraphicsState()
-    pdf.setGState(new pdf.GState({ opacity: 0.08 }))
+    pdf.setGState(new (pdf as unknown as { GState: new (opts: { opacity: number }) => unknown }).GState({ opacity: 0.08 }))
 
     if (company?.logo_url) {
       try {

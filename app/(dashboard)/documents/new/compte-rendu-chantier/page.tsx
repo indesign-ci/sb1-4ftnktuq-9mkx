@@ -249,8 +249,8 @@ export default function CompteRenduChantierPage() {
       const lot = lots.find((l) => l.id === lotId)
       if (lot) updateLot(lotId, 'photos', [...lot.photos, { url, name }])
       toast.success('Photo ajoutée')
-    } catch {
-      toast.error('Erreur upload')
+    } catch (err: any) {
+      toast.error(err?.message || 'Erreur upload')
     }
   }
   const removePhotoFromLot = (lotId: string, index: number) => {
@@ -295,7 +295,7 @@ export default function CompteRenduChantierPage() {
       router.push('/documents-pro')
     } catch (e) {
       console.error(e)
-      toast.error('Erreur lors de la sauvegarde')
+      toast.error(e?.message || 'Erreur lors de la sauvegarde')
     } finally {
       setIsSaving(false)
     }
@@ -359,7 +359,7 @@ export default function CompteRenduChantierPage() {
         documentNumber: generateDocumentNumber(),
         documentTitle: 'Compte-rendu de réunion de chantier',
         documentDate: new Date(formData.date_reunion),
-        company: { name: company?.name },
+        company: { name: company?.name ?? '' },
         projectName: selectedProject.name,
         sections,
       })

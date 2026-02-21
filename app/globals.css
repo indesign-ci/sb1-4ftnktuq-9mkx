@@ -8,6 +8,35 @@
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
+  /* Conception / Luxury design system */
+  --cp-gold: #C4A265;
+  --cp-gold-light: #D4B87A;
+  --cp-gold-dark: #A68B55;
+  --cp-gold-muted: rgba(196, 162, 101, 0.15);
+  --cp-gold-glow: rgba(196, 162, 101, 0.3);
+  --cp-dark: #0A0A0F;
+  --cp-dark-card: #111118;
+  --cp-dark-elevated: #16161F;
+  --cp-dark-surface: #1C1C28;
+  --cp-dark-border: rgba(255, 255, 255, 0.06);
+  --cp-dark-border-hover: rgba(196, 162, 101, 0.2);
+  --cp-text-primary: #F5F0EB;
+  --cp-text-secondary: #9B9BAE;
+  --cp-text-muted: #6B6B80;
+  --cp-success: #4ADE80;
+  --cp-warning: #FBBF24;
+  --cp-error: #F87171;
+  --cp-info: #60A5FA;
+  --cp-radius-sm: 8px;
+  --cp-radius-md: 12px;
+  --cp-radius-lg: 16px;
+  --cp-radius-xl: 24px;
+  --cp-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --cp-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --cp-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --cp-shadow-gold: 0 0 30px rgba(196, 162, 101, 0.1);
+  --cp-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --cp-transition-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -98,4 +127,145 @@
   .safe-area-pb {
     padding-bottom: env(safe-area-inset-bottom, 0);
   }
+}
+
+/* ========== LUXE DESIGN SYSTEM ========== */
+
+@layer base {
+  :root {
+    --color-or: #C8A97E;
+    --color-or-light: #E8D5B5;
+    --color-or-dark: #A68B5B;
+    --color-bg: #FFFDF9;
+    --color-bg-alt: #F8F5F0;
+    --color-border: #E8E0D5;
+    --color-text: #1A1A1A;
+    --color-text-muted: #6B6159;
+  }
+}
+
+@layer components {
+  /* Bouton doré premium */
+  .btn-luxe {
+    @apply relative inline-flex items-center justify-center gap-2
+           px-6 py-3 rounded-lg font-medium text-sm
+           bg-luxe-950 text-white
+           transition-all duration-500 ease-out
+           hover:shadow-luxe-lg hover:-translate-y-0.5
+           active:translate-y-0;
+    background: linear-gradient(135deg, #1A1A1A 0%, #2D2A26 100%);
+  }
+  .btn-luxe::after {
+    content: '';
+    @apply absolute inset-0 rounded-lg opacity-0 transition-opacity duration-500;
+    background: linear-gradient(135deg, #C8A97E 0%, #A68B5B 100%);
+  }
+  .btn-luxe:hover::after {
+    @apply opacity-100;
+  }
+  .btn-luxe > * {
+    @apply relative z-10;
+  }
+
+  /* Bouton doré outline */
+  .btn-luxe-outline {
+    @apply inline-flex items-center justify-center gap-2
+           px-6 py-3 rounded-lg font-medium text-sm
+           border border-or/30 text-luxe-950
+           transition-all duration-300
+           hover:border-or hover:bg-or/5 hover:shadow-luxe;
+  }
+
+  /* Carte premium */
+  .card-luxe {
+    @apply bg-white rounded-2xl border border-luxe-200/60
+           shadow-card transition-all duration-500 ease-out
+           hover:shadow-card-hover hover:-translate-y-1;
+  }
+
+  /* Input élégant */
+  .input-luxe {
+    @apply w-full px-4 py-3 rounded-lg
+           bg-luxe-50 border border-luxe-200
+           text-luxe-950 placeholder:text-luxe-800/40
+           transition-all duration-300
+           focus:outline-none focus:border-or focus:ring-2 focus:ring-or/10
+           focus:bg-white;
+  }
+
+  /* Badge doré */
+  .badge-luxe {
+    @apply inline-flex items-center gap-1.5 px-3 py-1
+           rounded-full text-xs font-medium
+           bg-or/10 text-or-dark border border-or/20;
+  }
+
+  /* Séparateur doré */
+  .divider-luxe {
+    @apply w-full h-px bg-gradient-to-r from-transparent via-or/30 to-transparent;
+  }
+
+  /* Texte avec accent doré */
+  .text-gradient-or {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, #C8A97E, #A68B5B);
+  }
+
+  /* Skeleton loading luxe */
+  .skeleton-luxe {
+    @apply rounded-lg;
+    background: linear-gradient(90deg, #F8F5F0 25%, #F0EBE3 50%, #F8F5F0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite linear;
+  }
+
+  /* Scrollbar élégante */
+  .scrollbar-luxe::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-luxe::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  .scrollbar-luxe::-webkit-scrollbar-thumb {
+    @apply bg-luxe-300 rounded-full;
+  }
+  .scrollbar-luxe::-webkit-scrollbar-thumb:hover {
+    @apply bg-or;
+  }
+
+  /* Overlay glassmorphism */
+  .glass-luxe {
+    @apply bg-white/70 backdrop-blur-xl border border-white/20;
+  }
+}
+
+/* Transitions de page */
+.page-transition-enter {
+  opacity: 0;
+  transform: translateY(12px);
+}
+.page-transition-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Image hover zoom */
+.img-zoom {
+  @apply overflow-hidden;
+}
+.img-zoom img {
+  @apply transition-transform duration-700 ease-out;
+}
+.img-zoom:hover img {
+  @apply scale-110;
+}
+
+/* Presentation mode fullscreen */
+.presentation-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #0A0A0A;
 }

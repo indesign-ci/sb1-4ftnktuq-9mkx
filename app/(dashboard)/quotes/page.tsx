@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
 import { supabase } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -69,6 +70,7 @@ const statusLabels: Record<string, string> = {
 }
 
 export default function QuotesPage() {
+  const searchParams = useSearchParams()
   const { profile } = useAuth()
   const [quotes, setQuotes] = useState<Quote[]>([])
   const [loading, setLoading] = useState(true)
@@ -78,7 +80,12 @@ export default function QuotesPage() {
   const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null)
   const [isDetailOpen, setIsDetailOpen] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
-  
+
+  const defaultClientIdFromUrl = searchParams.get('client_id') || undefined
+
+  useEffect(() => {
+    if (defaultClientIdFromUrl) setIsCreateOpen(true)
+  }, [defaultClientIdFromUrl])
 
   const loadQuotes = async () => {
     try {
@@ -99,8 +106,8 @@ export default function QuotesPage() {
 
       if (error) throw error
       setQuotes(data || [])
-    } catch {
-      toast.error('Erreur lors du chargement des devis')
+    } catch (err: any) {
+      toast.error(err?.message || 'Erreur lors du chargement des devis')
     } finally {
       setLoading(false)
     }
@@ -118,8 +125,8 @@ export default function QuotesPage() {
       if (error) throw error
       toast.success('Devis supprimé')
       loadQuotes()
-    } catch {
-      toast.error('Erreur lors de la suppression')
+    } catch (err: any) {
+      toast.error(err?.message || 'Erreur lors de la suppression')
     }
   }
 
@@ -208,8 +215,8 @@ export default function QuotesPage() {
 
       toast.success('Devis dupliqué')
       loadQuotes()
-    } catch {
-      toast.error('Erreur lors de la duplication')
+    } catch (err: any) {
+      toast.error(err?.message || 'Erreur lors de la duplication')
     }
   }
 
@@ -251,6 +258,7 @@ export default function QuotesPage() {
           discount_amount: full.discount_amount,
           total_ht: full.total_ht,
           vat_10: full.vat_10,
+          vat_18: full.vat_18,
           vat_20: full.vat_20,
           total_ttc: full.total_ttc,
           amount_due: full.total_ttc,
@@ -290,8 +298,8 @@ export default function QuotesPage() {
       }
 
       toast.success('Facture créée avec succès')
-    } catch {
-      toast.error('Erreur lors de la conversion en facture')
+    } catch (err: any) {
+      toast.error(err?.message || 'Erreur lors de la conversion en facture')
     }
   }
 
@@ -373,6 +381,7 @@ export default function QuotesPage() {
               </DialogDescription>
             </DialogHeader>
             <QuoteForm
+              defaultClientId={defaultClientIdFromUrl}
               onSuccess={() => {
                 setIsCreateOpen(false)
                 loadQuotes()

@@ -87,7 +87,7 @@ export function CategoriesSettings() {
       if (type === 'acquisition_source') setNewAcquisitionSource('')
       loadCategories()
     } catch (error: any) {
-      toast.error('Erreur lors de l\'ajout')
+      toast.error(error?.message || 'Erreur lors de l\'ajout')
     }
   }
 

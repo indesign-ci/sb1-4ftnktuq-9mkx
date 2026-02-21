@@ -244,9 +244,9 @@ export default function PVReceptionPage() {
       if (error) throw error
       toast.success('PV de réception sauvegardé en brouillon')
       router.push('/documents-pro')
-    } catch (e) {
+    } catch (e: any) {
       console.error(e)
-      toast.error('Erreur lors de la sauvegarde')
+      toast.error(e?.message || 'Erreur lors de la sauvegarde')
     } finally {
       setIsSaving(false)
     }
@@ -297,7 +297,7 @@ export default function PVReceptionPage() {
         documentNumber: generateDocumentNumber(),
         documentTitle: 'Procès-verbal de réception des travaux',
         documentDate: new Date(formData.date_reception),
-        company: { name: company?.name },
+        company: { name: company?.name ?? '' },
         client: { name: clientName },
         projectName: selectedProject.name,
         sections,
@@ -467,8 +467,8 @@ export default function PVReceptionPage() {
                             updateReserve(r.id, 'photo_url', url)
                             updateReserve(r.id, 'photo_name', name)
                             toast.success('Photo ajoutée')
-                          } catch {
-                            toast.error('Erreur upload')
+                          } catch (err: any) {
+                            toast.error(err?.message || 'Erreur upload')
                           }
                           e.target.value = ''
                         }}

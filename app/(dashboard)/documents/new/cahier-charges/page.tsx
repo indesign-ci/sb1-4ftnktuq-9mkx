@@ -218,7 +218,7 @@ export default function CahierChargesArtisansPage() {
       router.push('/documents-pro')
     } catch (e) {
       console.error(e)
-      toast.error('Erreur lors de la sauvegarde')
+      toast.error(e?.message || 'Erreur lors de la sauvegarde')
     } finally {
       setIsSaving(false)
     }
@@ -261,7 +261,7 @@ export default function CahierChargesArtisansPage() {
         documentNumber: generateDocumentNumber(),
         documentTitle: 'Cahier des Charges Artisans',
         documentDate: new Date(formData.date),
-        company: { name: company?.name, address: company?.address, phone: company?.phone, email: company?.email },
+        company: { name: company?.name ?? '', address: company?.address, phone: company?.phone, email: company?.email },
         projectName: selectedProject.name,
         sections,
       })

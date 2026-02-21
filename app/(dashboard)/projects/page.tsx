@@ -50,7 +50,7 @@ export default function ProjectsPage() {
   useEffect(() => {
     loadProjects()
     loadArchitects()
-  }, [])
+  }, [profile?.company_id])
 
   useEffect(() => {
     filterProjects()
@@ -62,13 +62,11 @@ export default function ProjectsPage() {
         .from('projects')
         .select(`
           *,
-          clients (id, first_name, last_name),
-          profiles (id, first_name, last_name)
+          clients (id, first_name, last_name)
         `)
         .is('deleted_at', null)
         .order('created_at', { ascending: false })
 
-      // Filter by company_id only if profile exists
       if (profile?.company_id) {
         query = query.eq('company_id', profile.company_id)
       }
@@ -77,8 +75,10 @@ export default function ProjectsPage() {
 
       if (error) throw error
       setProjects(data || [])
-    } catch (error) {
-      toast.error('Erreur lors du chargement des projets')
+    } catch (error: any) {
+      const msg = error?.message || 'Erreur lors du chargement des projets'
+      toast.error(msg)
+      console.error('loadProjects:', error)
     } finally {
       setLoading(false)
     }
@@ -100,8 +100,8 @@ export default function ProjectsPage() {
 
       if (error) throw error
       setArchitects(data || [])
-    } catch {
-      toast.error('Erreur lors du chargement des architectes')
+    } catch (err: any) {
+      toast.error(err?.message || 'Erreur lors du chargement des architectes')
     }
   }
 
@@ -296,6 +296,7 @@ export default function ProjectsPage() {
       ) : (
         <ProjectsTable
           projects={paginatedProjects}
+          architects={architects}
           onEdit={handleEdit}
           onDelete={handleDelete}
         />

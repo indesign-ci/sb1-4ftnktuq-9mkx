@@ -51,7 +51,7 @@ export async function generateProfessionalDocumentPDF(data: DocumentData): Promi
 
   const addWatermark = () => {
     doc.saveGraphicsState()
-    doc.setGState(new doc.GState({ opacity: 0.08 }))
+    doc.setGState(new (doc as unknown as { GState: new (opts: { opacity: number }) => unknown }).GState({ opacity: 0.08 }))
 
     if (data.company?.logo_url) {
       try {
@@ -200,7 +200,7 @@ export async function generateProfessionalDocumentPDF(data: DocumentData): Promi
     if (data.client.phone || data.client.email) {
       const contactInfo = [data.client.phone, data.client.email].filter(Boolean)
       contactInfo.forEach((info, index) => {
-        doc.text(info, margin + 5, yPosition + 21 + index * 4)
+        doc.text(String(info ?? ''), margin + 5, yPosition + 21 + index * 4)
       })
     }
 
@@ -302,7 +302,7 @@ async function generateProfessionalDocumentPDFInstance(data: DocumentData): Prom
 
   const addWatermark = () => {
     doc.saveGraphicsState()
-    doc.setGState(new doc.GState({ opacity: 0.08 }))
+    doc.setGState(new (doc as unknown as { GState: new (opts: { opacity: number }) => unknown }).GState({ opacity: 0.08 }))
 
     if (data.company?.logo_url) {
       try {
@@ -451,7 +451,7 @@ async function generateProfessionalDocumentPDFInstance(data: DocumentData): Prom
     if (data.client.phone || data.client.email) {
       const contactInfo = [data.client.phone, data.client.email].filter(Boolean)
       contactInfo.forEach((info, index) => {
-        doc.text(info, margin + 5, yPosition + 21 + index * 4)
+        doc.text(String(info ?? ''), margin + 5, yPosition + 21 + index * 4)
       })
     }
 

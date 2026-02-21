@@ -150,8 +150,9 @@ export function CompanySettings() {
       toast.success('Informations de l\'entreprise mises à jour')
       loadCompany()
     } catch (error: any) {
-      toast.error('Erreur lors de la sauvegarde')
-      console.error(error)
+      const msg = error?.message || error?.error_description || 'Erreur lors de la sauvegarde'
+      toast.error(msg)
+      console.error('[CompanySettings]', error)
     } finally {
       setLoading(false)
     }

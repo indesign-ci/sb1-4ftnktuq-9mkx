@@ -151,6 +151,23 @@ const withPWA = require('next-pwa')({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  webpack: (config, { dev }) => {
+    if (dev) {
+      config.watchOptions = {
+        ...config.watchOptions,
+        ignored: [
+          '**/node_modules/**',
+          '**/.next/**',
+          'C:\\swapfile.sys',
+          'C:\\hiberfil.sys',
+          'C:\\pagefile.sys',
+        ],
+        aggregateTimeout: 300,
+        poll: 2000,
+      }
+    }
+    return config
+  },
   images: {
     remotePatterns: [
       {

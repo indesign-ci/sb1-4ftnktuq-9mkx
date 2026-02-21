@@ -192,7 +192,7 @@ export default function ComparatifDevisPage() {
       router.push('/documents-pro')
     } catch (e) {
       console.error(e)
-      toast.error('Erreur lors de la sauvegarde')
+      toast.error(e?.message || 'Erreur lors de la sauvegarde')
     } finally {
       setIsSaving(false)
     }
@@ -228,7 +228,7 @@ export default function ComparatifDevisPage() {
         documentNumber: generateDocumentNumber(),
         documentTitle: 'Tableau comparatif des devis artisans',
         documentDate: new Date(formData.date),
-        company: { name: company?.name },
+        company: { name: company?.name ?? '' },
         projectName: selectedProject.name,
         sections,
       })

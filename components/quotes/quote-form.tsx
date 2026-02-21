@@ -44,6 +44,7 @@ type QuoteSection = {
 
 type QuoteFormProps = {
   quoteId?: string
+  defaultClientId?: string
   onSuccess: () => void
 }
 
@@ -57,12 +58,12 @@ const DEFAULT_SECTIONS = [
 
 const UNITS = ['m²', 'ml', 'u', 'forfait', 'h']
 
-export function QuoteForm({ quoteId, onSuccess }: QuoteFormProps) {
+export function QuoteForm({ quoteId, defaultClientId, onSuccess }: QuoteFormProps) {
   const { profile } = useAuth()
   const [loading, setLoading] = useState(false)
   const [clients, setClients] = useState<any[]>([])
   const [projects, setProjects] = useState<any[]>([])
-  
+
 
   const [formData, setFormData] = useState({
     client_id: '',
@@ -93,6 +94,12 @@ export function QuoteForm({ quoteId, onSuccess }: QuoteFormProps) {
       loadQuote()
     }
   }, [quoteId])
+
+  useEffect(() => {
+    if (defaultClientId && !quoteId && !formData.client_id) {
+      setFormData((prev) => ({ ...prev, client_id: defaultClientId }))
+    }
+  }, [defaultClientId, quoteId])
 
   useEffect(() => {
     if (formData.client_id) {
@@ -430,7 +437,7 @@ export function QuoteForm({ quoteId, onSuccess }: QuoteFormProps) {
       toast.success(quoteId ? 'Devis modifié' : 'Devis créé')
       onSuccess()
     } catch (error: any) {
-      toast.error('Erreur lors de la sauvegarde')
+      toast.error(error?.message || 'Erreur lors de la sauvegarde')
       console.error(error)
     } finally {
       setLoading(false)

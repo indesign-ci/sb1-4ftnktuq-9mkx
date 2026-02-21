@@ -27,11 +27,22 @@ import { format } from 'date-fns'
 
 interface ProjectsTableProps {
   projects: any[]
+  architects?: { id: string; first_name: string | null; last_name: string | null }[]
   onEdit: (project: any) => void
   onDelete: (project: any) => void
 }
 
-export function ProjectsTable({ projects, onEdit, onDelete }: ProjectsTableProps) {
+export function ProjectsTable({ projects, architects = [], onEdit, onDelete }: ProjectsTableProps) {
+  const getArchitectName = (project: any) => {
+    if (project.profiles) {
+      return `${project.profiles.first_name || ''} ${project.profiles.last_name || ''}`.trim()
+    }
+    if (project.architect_id && architects.length) {
+      const a = architects.find((x) => x.id === project.architect_id)
+      return a ? `${a.first_name || ''} ${a.last_name || ''}`.trim() : ''
+    }
+    return ''
+  }
   const [sortColumn, setSortColumn] = useState<string>('name')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
 
@@ -54,8 +65,8 @@ export function ProjectsTable({ projects, onEdit, onDelete }: ProjectsTableProps
     }
 
     if (sortColumn === 'architect') {
-      aValue = `${a.profiles?.first_name || ''} ${a.profiles?.last_name || ''}`
-      bValue = `${b.profiles?.first_name || ''} ${b.profiles?.last_name || ''}`
+      aValue = getArchitectName(a)
+      bValue = getArchitectName(b)
     }
 
     if (aValue === null || aValue === undefined) return 1
@@ -320,10 +331,8 @@ export function ProjectsTable({ projects, onEdit, onDelete }: ProjectsTableProps
                     )}
                   </TableCell>
                   <TableCell>
-                    {project.profiles ? (
-                      <span className="text-sm">
-                        {project.profiles.first_name} {project.profiles.last_name}
-                      </span>
+                    {getArchitectName(project) ? (
+                      <span className="text-sm">{getArchitectName(project)}</span>
                     ) : (
                       <span className="text-gray-400 text-sm">-</span>
                     )}

@@ -186,7 +186,7 @@ export default function SuiviFinancierPage() {
       router.push('/documents-pro')
     } catch (e) {
       console.error(e)
-      toast.error('Erreur lors de la sauvegarde')
+      toast.error(e?.message || 'Erreur lors de la sauvegarde')
     } finally {
       setIsSaving(false)
     }
@@ -225,7 +225,7 @@ export default function SuiviFinancierPage() {
         documentNumber: `SF-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 999) + 1).padStart(3, '0')}`,
         documentTitle: 'Fiche de suivi financier chantier',
         documentDate: new Date(formData.date_maj),
-        company: { name: company?.name },
+        company: { name: company?.name ?? '' },
         projectName: selectedProject.name,
         sections,
       })

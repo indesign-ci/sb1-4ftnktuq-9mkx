@@ -61,28 +61,31 @@ export default function DetailedQuotePage() {
   })
 
   useEffect(() => {
-    loadData()
-  }, [])
+    if (profile?.company_id) loadData()
+  }, [profile?.company_id])
 
   useEffect(() => {
     calculateTotals()
   }, [formData.lines, formData.discount_percentage, formData.vat_percentage])
 
   const loadData = async () => {
+    if (!profile?.company_id) return
     try {
       const [clientsRes, projectsRes, companyRes] = await Promise.all([
         supabase
           .from('clients')
           .select('id, first_name, last_name, email, phone, address')
-          .eq('company_id', profile?.company_id || ''),
+          .eq('company_id', profile.company_id)
+          .order('first_name'),
         supabase
           .from('projects')
-          .select('id, name')
-          .eq('company_id', profile?.company_id || ''),
+          .select('id, name, client_id')
+          .eq('company_id', profile.company_id)
+          .order('name'),
         supabase
           .from('companies')
           .select('*')
-          .eq('id', profile?.company_id || '')
+          .eq('id', profile.company_id)
           .maybeSingle(),
       ])
 
@@ -93,6 +96,10 @@ export default function DetailedQuotePage() {
       console.error('Error loading data:', error)
     }
   }
+
+  const projectsForSelect = formData.client_id
+    ? projects.filter((p: { client_id?: string }) => p.client_id === formData.client_id)
+    : projects
 
   const generateDocumentNumber = () => {
     const date = new Date()
@@ -202,7 +209,7 @@ export default function DetailedQuotePage() {
       toast.success('Devis sauvegardé en brouillon')
       router.push('/documents-pro')
     } catch (error: any) {
-      toast.error('Erreur lors de la sauvegarde')
+      toast.error(error?.message || 'Erreur lors de la sauvegarde')
       console.error(error)
     } finally {
       setIsSaving(false)
@@ -288,8 +295,11 @@ export default function DetailedQuotePage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="client_id">Client *</Label>
-              <Select value={formData.client_id} onValueChange={(v) => setFormData({ ...formData, client_id: v })}>
-                <SelectTrigger>
+              <Select
+                value={formData.client_id || undefined}
+                onValueChange={(v) => setFormData({ ...formData, client_id: v, project_id: '' })}
+              >
+                <SelectTrigger id="client_id">
                   <SelectValue placeholder="Sélectionner un client" />
                 </SelectTrigger>
                 <SelectContent>
@@ -304,12 +314,17 @@ export default function DetailedQuotePage() {
 
             <div className="space-y-2">
               <Label htmlFor="project_id">Projet (optionnel)</Label>
-              <Select value={formData.project_id} onValueChange={(v) => setFormData({ ...formData, project_id: v })}>
-                <SelectTrigger>
+              <Select
+                value={formData.project_id || undefined}
+                onValueChange={(v) => setFormData({ ...formData, project_id: v })}
+                disabled={!formData.client_id}
+              >
+                <SelectTrigger id="project_id">
                   <SelectValue placeholder="Sélectionner un projet" />
                 </SelectTrigger>
                 <SelectContent>
-                  {projects.map((project) => (
+                  <SelectItem value="">Aucun projet</SelectItem>
+                  {projectsForSelect.map((project: { id: string; name: string }) => (
                     <SelectItem key={project.id} value={project.id}>
                       {project.name}
                     </SelectItem>

@@ -134,7 +134,7 @@ export function PaymentDialog({
         notes: '',
       })
     } catch (error: any) {
-      toast.error('Erreur lors de l\'enregistrement du paiement')
+      toast.error(error?.message || 'Erreur lors de l\'enregistrement du paiement')
       console.error(error)
     } finally {
       setLoading(false)

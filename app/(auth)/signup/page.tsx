@@ -46,13 +46,18 @@ export default function SignupPage() {
       })
       const data = await res.json()
       if (!res.ok) {
-        toast.error(data.error || 'Erreur lors de la création du compte')
+        const msg = data.error || 'Erreur lors de la création du compte'
+        if (msg.toLowerCase().includes('invalid api key') || msg.toLowerCase().includes('configuration manquante')) {
+          toast.error('Clé API Supabase manquante ou incorrecte. Vercel → Settings → Environment Variables : ajoutez SUPABASE_SERVICE_ROLE_KEY (clé service_role de Supabase), puis redéployez.')
+        } else {
+          toast.error(msg)
+        }
         return
       }
       toast.success(data.message || 'Compte créé ! Connectez-vous.')
       router.push('/login')
-    } catch {
-      toast.error('Erreur de connexion au serveur')
+    } catch (err: any) {
+      toast.error(err?.message || 'Erreur de connexion au serveur')
     } finally {
       setLoading(false)
     }
@@ -73,7 +78,7 @@ export default function SignupPage() {
         </div>
         <div className="absolute bottom-12 left-12 right-12 z-10">
           <p className="text-white text-xl md:text-2xl italic font-light leading-relaxed">
-            "Le luxe, c'est quand le détail rejoint l'excellence."
+            {`"Le luxe, c'est quand le détail rejoint l'excellence."`}
           </p>
         </div>
       </div>

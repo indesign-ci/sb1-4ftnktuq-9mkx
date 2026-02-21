@@ -50,21 +50,33 @@ type Client = {
 const statusColors: Record<string, string> = {
   prospect: 'bg-gray-500 text-white',
   first_contact: 'bg-blue-500 text-white',
+  premier_contact: 'bg-blue-500 text-white',
   quote_sent: 'bg-yellow-500 text-white',
+  devis_envoye: 'bg-yellow-500 text-white',
   project_signed: 'bg-green-500 text-white',
+  projet_signe: 'bg-green-500 text-white',
   active: 'bg-emerald-500 text-white',
+  actif: 'bg-emerald-500 text-white',
   completed: 'bg-purple-500 text-white',
+  termine: 'bg-purple-500 text-white',
   inactive: 'bg-gray-400 text-white',
+  inactif: 'bg-gray-400 text-white',
 }
 
 const statusLabels: Record<string, string> = {
   prospect: 'Prospect',
   first_contact: 'Premier contact',
+  premier_contact: 'Premier contact',
   quote_sent: 'Devis envoyé',
+  devis_envoye: 'Devis envoyé',
   project_signed: 'Projet signé',
+  projet_signe: 'Projet signé',
   active: 'Actif',
+  actif: 'Actif',
   completed: 'Terminé',
+  termine: 'Terminé',
   inactive: 'Inactif',
+  inactif: 'Inactif',
 }
 
 export default function ClientsPage() {
@@ -94,8 +106,8 @@ export default function ClientsPage() {
 
       if (error) throw error
       setClients(data || [])
-    } catch {
-      toast.error('Erreur lors du chargement des clients')
+    } catch (err: any) {
+      toast.error(err?.message || 'Erreur lors du chargement des clients')
     } finally {
       setLoading(false)
     }
@@ -113,18 +125,43 @@ export default function ClientsPage() {
       if (error) throw error
       toast.success('Client supprimé')
       loadClients()
-    } catch {
-      toast.error('Erreur lors de la suppression')
+    } catch (err: any) {
+      toast.error(err?.message || 'Erreur lors de la suppression')
     }
   }
 
-  const filteredClients = clients.filter((client) => {
-    const matchesSearch =
-      client.first_name.toLowerCase().includes(search.toLowerCase()) ||
-      client.last_name.toLowerCase().includes(search.toLowerCase()) ||
-      client.email?.toLowerCase().includes(search.toLowerCase())
+  // Recherche progressive par nom (prénom, nom ou les deux), email
+  const searchTrimmed = search.trim().toLowerCase()
+  const searchTerms = searchTrimmed ? searchTrimmed.split(/\s+/) : []
 
-    const matchesStatus = statusFilter === 'all' || client.status === statusFilter
+  const filteredClients = clients.filter((client) => {
+    const fullName = `${client.first_name} ${client.last_name}`.toLowerCase()
+    const fullNameReversed = `${client.last_name} ${client.first_name}`.toLowerCase()
+    const matchesSearch = searchTerms.length
+      ? searchTerms.every(
+          (term) =>
+            client.first_name.toLowerCase().includes(term) ||
+            client.last_name.toLowerCase().includes(term) ||
+            fullName.includes(term) ||
+            fullNameReversed.includes(term) ||
+            client.email?.toLowerCase().includes(term)
+        )
+      : true
+
+    const statusMatchesFilter = (dbStatus: string, filter: string) => {
+      if (filter === 'all') return true
+      const equivalents: Record<string, string[]> = {
+        prospect: ['prospect'],
+        first_contact: ['first_contact', 'premier_contact'],
+        quote_sent: ['quote_sent', 'devis_envoye'],
+        project_signed: ['project_signed', 'projet_signe'],
+        active: ['active', 'actif'],
+        completed: ['completed', 'termine'],
+        inactive: ['inactive', 'inactif'],
+      }
+      return (equivalents[filter] ?? [filter]).includes(dbStatus)
+    }
+    const matchesStatus = statusFilter === 'all' || statusMatchesFilter(client.status, statusFilter)
 
     return matchesSearch && matchesStatus
   })
@@ -143,35 +180,48 @@ export default function ClientsPage() {
               Nouveau client
             </Button>
           </DialogTrigger>
-          {/* Plein écran mobile, centré sur desktop */}
-          <DialogContent className="flex h-full max-h-[100dvh] w-full max-w-none flex-col rounded-none border-0 p-4 md:h-auto md:max-h-[90vh] md:max-w-2xl md:rounded-lg md:border md:p-6">
-            <DialogHeader>
-              <DialogTitle>Nouveau client</DialogTitle>
-              <DialogDescription>
+          {/* Formulaire en plein écran, menu visible à gauche ; zone scrollable pour voir tout le formulaire + bouton Créer */}
+          <DialogContent
+            overlayClassName="md:left-16 lg:left-64"
+            className="fixed inset-0 z-50 flex h-[100dvh] w-full max-w-none flex-col overflow-hidden rounded-none border-0 bg-background md:left-16 lg:left-64"
+          >
+            <DialogHeader className="shrink-0 border-b bg-background px-3 py-2 sm:px-4 md:px-6">
+              <DialogTitle className="text-base">Nouveau client</DialogTitle>
+              <DialogDescription className="text-xs">
                 Remplissez les informations du nouveau client
               </DialogDescription>
             </DialogHeader>
-            <ClientForm
-              onSuccess={() => {
-                setIsCreateOpen(false)
-                loadClients()
-              }}
-            />
+            <div className="min-h-0 flex-1 overflow-y-auto px-3 py-3 sm:px-4 md:px-6">
+              <ClientForm
+                onSuccess={() => {
+                  setIsCreateOpen(false)
+                  loadClients()
+                }}
+              />
+            </div>
           </DialogContent>
         </Dialog>
       </div>
 
+      {/* Zone recherche : saisie du nom pour affichage progressif des clients */}
       <Card>
         <CardHeader>
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
             <div className="relative flex-1 w-full">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 pointer-events-none" />
               <Input
-                placeholder="Rechercher un client..."
+                type="search"
+                placeholder="Rechercher par nom du client (saisir pour afficher les résultats)..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-9"
+                className="pl-9 pr-4 focus-visible:ring-[#C5A572]"
+                autoComplete="off"
               />
+              {searchTrimmed && (
+                <p className="mt-1.5 text-sm text-gray-500">
+                  {filteredClients.length} client{filteredClients.length !== 1 ? 's' : ''} affiché{filteredClients.length !== 1 ? 's' : ''}
+                </p>
+              )}
             </div>
             <div className="flex items-center gap-2 w-full md:w-auto md:min-w-[220px]">
               <Filter className="h-4 w-4 text-gray-400" />

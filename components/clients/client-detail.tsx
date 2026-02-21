@@ -19,21 +19,33 @@ interface ClientDetailProps {
 const statusColors: Record<string, string> = {
   prospect: 'bg-gray-500 text-white',
   first_contact: 'bg-blue-500 text-white',
+  premier_contact: 'bg-blue-500 text-white',
   quote_sent: 'bg-yellow-500 text-white',
+  devis_envoye: 'bg-yellow-500 text-white',
   project_signed: 'bg-green-500 text-white',
+  projet_signe: 'bg-green-500 text-white',
   active: 'bg-emerald-500 text-white',
+  actif: 'bg-emerald-500 text-white',
   completed: 'bg-purple-500 text-white',
+  termine: 'bg-purple-500 text-white',
   inactive: 'bg-gray-400 text-white',
+  inactif: 'bg-gray-400 text-white',
 }
 
 const statusLabels: Record<string, string> = {
   prospect: 'Prospect',
   first_contact: 'Premier contact',
+  premier_contact: 'Premier contact',
   quote_sent: 'Devis envoyé',
+  devis_envoye: 'Devis envoyé',
   project_signed: 'Projet signé',
+  projet_signe: 'Projet signé',
   active: 'Actif',
+  actif: 'Actif',
   completed: 'Terminé',
+  termine: 'Terminé',
   inactive: 'Inactif',
+  inactif: 'Inactif',
 }
 
 export function ClientDetail({ clientId }: ClientDetailProps) {
@@ -90,7 +102,7 @@ export function ClientDetail({ clientId }: ClientDetailProps) {
           <h2 className="text-2xl font-bold">
             {client.first_name} {client.last_name}
           </h2>
-          <Badge className={cn('mt-2', statusColors[client.status])}>{statusLabels[client.status]}</Badge>
+          <Badge className={cn('mt-2', statusColors[client.status] || 'bg-gray-500 text-white')}>{statusLabels[client.status] || client.status || '—'}</Badge>
         </div>
       </div>
 

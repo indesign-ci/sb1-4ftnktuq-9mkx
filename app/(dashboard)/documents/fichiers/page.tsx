@@ -77,8 +77,8 @@ export default function DocumentsFichiersPage() {
       const { data, error } = await supabase.from('documents').select('*').eq('company_id', profile.company_id).order('created_at', { ascending: false })
       if (error) throw error
       setDocuments(data || [])
-    } catch {
-      toast.error('Erreur lors du chargement des documents')
+    } catch (err: any) {
+      toast.error(err?.message || 'Erreur lors du chargement des documents')
     } finally {
       setLoading(false)
     }
@@ -86,7 +86,7 @@ export default function DocumentsFichiersPage() {
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
-    if (files.length === 0) return
+    if (files.length === 0 || !profile?.company_id) return
     setUploading(true)
     try {
       for (const file of files) {
@@ -96,7 +96,7 @@ export default function DocumentsFichiersPage() {
         }
         const fileExt = file.name.split('.').pop()
         const fileName = `document-${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
-        const filePath = `${profile?.company_id}/documents/${fileName}`
+        const filePath = `${profile.company_id}/documents/${fileName}`
         const { error: uploadError } = await supabase.storage.from('photos').upload(filePath, file)
         if (uploadError) throw uploadError
         const { data: { publicUrl } } = supabase.storage.from('photos').getPublicUrl(filePath)
@@ -105,8 +105,8 @@ export default function DocumentsFichiersPage() {
       }
       toast.success('Document(s) uploadé(s)')
       loadDocuments()
-    } catch {
-      toast.error('Erreur lors de l\'upload')
+    } catch (err: any) {
+      toast.error(err?.message || 'Erreur lors de l\'upload')
     } finally {
       setUploading(false)
     }
@@ -118,8 +118,8 @@ export default function DocumentsFichiersPage() {
       if (error) throw error
       toast.success('Catégorie mise à jour')
       loadDocuments()
-    } catch {
-      toast.error('Erreur lors de la mise à jour')
+    } catch (err: any) {
+      toast.error(err?.message || 'Erreur lors de la mise à jour')
     }
   }
 
@@ -130,8 +130,8 @@ export default function DocumentsFichiersPage() {
       if (error) throw error
       toast.success('Document supprimé')
       loadDocuments()
-    } catch {
-      toast.error('Erreur lors de la suppression')
+    } catch (err: any) {
+      toast.error(err?.message || 'Erreur lors de la suppression')
     } finally {
       setDeleteDialogOpen(false)
       setSelectedDocument(null)
@@ -243,7 +243,7 @@ export default function DocumentsFichiersPage() {
                   <Button variant="outline" size="sm" onClick={() => window.open(document.file_url, '_blank')} className="flex-1">
                     <Eye className="h-3 w-3 mr-1" /> Aperçu
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => { const link = document.createElement('a'); link.href = document.file_url; link.download = document.name; link.click() }}>
+                  <Button variant="outline" size="sm" onClick={() => { const link = window.document.createElement('a'); link.href = document.file_url; link.download = document.name; link.click() }}>
                     <Download className="h-3 w-3" />
                   </Button>
                   <Button variant="outline" size="sm" onClick={() => { setSelectedDocument(document); setDeleteDialogOpen(true) }} className="text-red-600 hover:text-red-700">

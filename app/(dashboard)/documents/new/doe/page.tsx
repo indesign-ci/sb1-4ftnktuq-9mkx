@@ -172,7 +172,7 @@ export default function DOEPage() {
       router.push('/documents-pro')
     } catch (e) {
       console.error(e)
-      toast.error('Erreur lors de la sauvegarde')
+      toast.error(e?.message || 'Erreur lors de la sauvegarde')
     } finally {
       setIsSaving(false)
     }
@@ -195,7 +195,7 @@ export default function DOEPage() {
         documentNumber: generateDocumentNumber(),
         documentTitle: 'Dossier des Ouvrages Exécutés (DOE)',
         documentDate: new Date(formData.date_remise),
-        company: { name: company?.name },
+        company: { name: company?.name ?? '' },
         client: { name: clientName },
         projectName: selectedProject.name,
         sections,

@@ -115,7 +115,7 @@ export function ProfileSettings() {
       toast.success('Profil mis à jour')
       window.location.reload()
     } catch (error: any) {
-      toast.error('Erreur lors de la sauvegarde')
+      toast.error(error?.message || 'Erreur lors de la sauvegarde')
       console.error(error)
     } finally {
       setLoading(false)

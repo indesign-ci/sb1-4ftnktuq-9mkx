@@ -11,6 +11,7 @@ import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ProjectForm } from '@/components/projects/project-form'
+import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
 import {
   ArrowLeft,
@@ -28,6 +29,8 @@ import {
   Activity,
   Phone,
   Mail,
+  MessageSquare,
+  Send,
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { getPhaseLabel, getStatusBadgeColor, formatCurrency, calculateMargin } from '@/lib/project-utils'
@@ -39,11 +42,14 @@ export default function ProjectDetailPage() {
   const [project, setProject] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-  const [phases, setPhases] = useState([])
-  const [tasks, setTasks] = useState([])
-  const [documents, setDocuments] = useState([])
-  const [moodboards, setMoodboards] = useState([])
-  const [activities, setActivities] = useState([])
+  const [phases, setPhases] = useState<any[]>([])
+  const [tasks, setTasks] = useState<any[]>([])
+  const [documents, setDocuments] = useState<any[]>([])
+  const [moodboards, setMoodboards] = useState<any[]>([])
+  const [activities, setActivities] = useState<any[]>([])
+  const [portalMessages, setPortalMessages] = useState<any[]>([])
+  const [newMessageContent, setNewMessageContent] = useState('')
+  const [sendingMessage, setSendingMessage] = useState(false)
 
   useEffect(() => {
     loadProject()
@@ -53,6 +59,10 @@ export default function ProjectDetailPage() {
     loadMoodboards()
     loadActivities()
   }, [params.id])
+
+  useEffect(() => {
+    if (project?.id && project?.client_id) loadPortalMessages()
+  }, [project?.id, project?.client_id])
 
   const loadProject = async () => {
     try {
@@ -162,6 +172,56 @@ export default function ProjectDetailPage() {
       setActivities(data || [])
     } catch (error) {
       console.error('Error loading activities:', error)
+    }
+  }
+
+  const loadPortalMessages = async () => {
+    if (!params.id) return
+    try {
+      const { data, error } = await supabase
+        .from('portal_messages')
+        .select('id, content, sender_name, sender_user_id, sender_client_id, created_at, is_read')
+        .eq('project_id', params.id)
+        .is('deleted_at', null)
+        .order('created_at', { ascending: true })
+
+      if (error) throw error
+      setPortalMessages(data || [])
+    } catch (error) {
+      console.error('Error loading portal messages:', error)
+    }
+  }
+
+  const handleSendPortalMessage = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!project?.client_id || !newMessageContent.trim() || !profile) return
+    setSendingMessage(true)
+    try {
+      const senderName =
+        [profile.first_name, profile.last_name].filter(Boolean).join(' ') ||
+        profile.email ||
+        'Équipe'
+
+      const { error } = await supabase.from('portal_messages').insert({
+        project_id: project.id,
+        client_id: project.client_id,
+        content: newMessageContent.trim(),
+        sender_user_id: profile.id,
+        sender_name: senderName,
+        has_attachments: false,
+      })
+
+      if (error) throw error
+      setNewMessageContent('')
+      await loadPortalMessages()
+      toast.success('Message envoyé au client. Il sera visible dans le portail client.')
+    } catch (error: unknown) {
+      console.error('Error sending message:', error)
+      toast.error(
+        error instanceof Error ? error.message : 'Erreur lors de l\'envoi du message'
+      )
+    } finally {
+      setSendingMessage(false)
     }
   }
 
@@ -595,6 +655,63 @@ export default function ProjectDetailPage() {
               )}
             </CardContent>
           </Card>
+
+          {project.client_id && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5 text-[#C5A572]" />
+                  Messages client (portail)
+                </CardTitle>
+                <CardDescription>
+                  Les messages sont visibles par le client dans son espace portail.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {portalMessages.length === 0 ? (
+                    <p className="text-sm text-gray-500 py-2">Aucun message pour l&apos;instant.</p>
+                  ) : (
+                    portalMessages.map((msg) => (
+                      <div
+                        key={msg.id}
+                        className={`rounded-lg border p-3 text-sm ${
+                          msg.sender_user_id
+                            ? 'border-[#C5A572]/30 bg-[#C5A572]/5'
+                            : 'border-gray-200 bg-gray-50'
+                        }`}
+                      >
+                        <p className="text-gray-900 whitespace-pre-wrap">{msg.content}</p>
+                        <p className="mt-1 text-xs text-gray-500">
+                          {msg.sender_name} ·{' '}
+                          {format(new Date(msg.created_at), 'dd/MM/yyyy HH:mm')}
+                        </p>
+                      </div>
+                    ))
+                  )}
+                </div>
+                <form onSubmit={handleSendPortalMessage} className="space-y-2">
+                  <Textarea
+                    placeholder="Écrire un message au client..."
+                    value={newMessageContent}
+                    onChange={(e) => setNewMessageContent(e.target.value)}
+                    rows={3}
+                    className="resize-none"
+                    disabled={sendingMessage}
+                  />
+                  <Button
+                    type="submit"
+                    size="sm"
+                    className="bg-[#C5A572] hover:bg-[#B39562]"
+                    disabled={!newMessageContent.trim() || sendingMessage}
+                  >
+                    <Send className="h-4 w-4 mr-2" />
+                    {sendingMessage ? 'Envoi...' : 'Envoyer au client'}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
 

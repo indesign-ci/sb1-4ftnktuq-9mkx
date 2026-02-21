@@ -188,7 +188,7 @@ export default function LeveeReservesPage() {
       router.push('/documents-pro')
     } catch (e) {
       console.error(e)
-      toast.error('Erreur lors de la sauvegarde')
+      toast.error(e?.message || 'Erreur lors de la sauvegarde')
     } finally {
       setIsSaving(false)
     }
@@ -222,7 +222,7 @@ export default function LeveeReservesPage() {
         documentNumber: generateDocumentNumber(),
         documentTitle: 'Fiche de levée des réserves',
         documentDate: new Date(formData.date),
-        company: { name: company?.name },
+        company: { name: company?.name ?? '' },
         client: { name: clientName },
         projectName: selectedProject.name,
         sections,

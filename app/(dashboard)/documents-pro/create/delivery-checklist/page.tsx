@@ -57,35 +57,41 @@ export default function DeliveryChecklistPage() {
   })
 
   useEffect(() => {
-    loadData()
-  }, [])
+    if (profile?.company_id) loadData()
+  }, [profile?.company_id])
 
   const loadData = async () => {
+    if (!profile?.company_id) return
     try {
       const [clientsRes, projectsRes, companyRes] = await Promise.all([
         supabase
           .from('clients')
           .select('id, first_name, last_name, email, phone, address')
-          .eq('company_id', profile?.company_id || ''),
+          .eq('company_id', profile.company_id)
+          .order('first_name'),
         supabase
           .from('projects')
-          .select('id, name')
-          .eq('company_id', profile?.company_id || ''),
+          .select('id, name, client_id')
+          .eq('company_id', profile.company_id)
+          .order('name'),
         supabase
           .from('companies')
           .select('*')
-          .eq('id', profile?.company_id || '')
+          .eq('id', profile.company_id)
           .maybeSingle(),
       ])
 
       if (clientsRes.data) setClients(clientsRes.data)
       if (projectsRes.data) setProjects(projectsRes.data)
-      const companyData = (companyRes as { data: unknown }).data
-      if (companyData) setCompany(companyData)
+      if (companyRes.data) setCompany(companyRes.data)
     } catch (error: any) {
       console.error('Error loading data:', error)
     }
   }
+
+  const projectsForSelect = formData.client_id
+    ? projects.filter((p: { client_id?: string }) => p.client_id === formData.client_id)
+    : projects
 
   const generateDocumentNumber = () => {
     const date = new Date()
@@ -127,7 +133,7 @@ export default function DeliveryChecklistPage() {
       toast.success('Check-list sauvegardée en brouillon')
       router.push('/documents-pro')
     } catch (error: any) {
-      toast.error('Erreur lors de la sauvegarde')
+      toast.error(error?.message || 'Erreur lors de la sauvegarde')
       console.error(error)
     } finally {
       setIsSaving(false)
@@ -204,15 +210,18 @@ export default function DeliveryChecklistPage() {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="project_id">Projet *</Label>
-              <Select value={formData.project_id} onValueChange={(v) => setFormData({ ...formData, project_id: v })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionner un projet" />
+              <Label htmlFor="client_id">Client</Label>
+              <Select
+                value={formData.client_id || undefined}
+                onValueChange={(v) => setFormData({ ...formData, client_id: v, project_id: '' })}
+              >
+                <SelectTrigger id="client_id">
+                  <SelectValue placeholder="Sélectionner un client" />
                 </SelectTrigger>
                 <SelectContent>
-                  {projects.map((project) => (
-                    <SelectItem key={project.id} value={project.id}>
-                      {project.name}
+                  {clients.map((client) => (
+                    <SelectItem key={client.id} value={client.id}>
+                      {client.first_name} {client.last_name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -220,15 +229,19 @@ export default function DeliveryChecklistPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="client_id">Client</Label>
-              <Select value={formData.client_id} onValueChange={(v) => setFormData({ ...formData, client_id: v })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionner un client" />
+              <Label htmlFor="project_id">Projet *</Label>
+              <Select
+                value={formData.project_id || undefined}
+                onValueChange={(v) => setFormData({ ...formData, project_id: v })}
+                disabled={!formData.client_id}
+              >
+                <SelectTrigger id="project_id">
+                  <SelectValue placeholder="Sélectionner un projet" />
                 </SelectTrigger>
                 <SelectContent>
-                  {clients.map((client) => (
-                    <SelectItem key={client.id} value={client.id}>
-                      {client.first_name} {client.last_name}
+                  {projectsForSelect.map((p: { id: string; name: string }) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.name}
                     </SelectItem>
                   ))}
                 </SelectContent>

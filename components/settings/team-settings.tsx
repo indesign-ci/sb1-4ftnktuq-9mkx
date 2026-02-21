@@ -25,7 +25,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { toast } from 'sonner'
-import { UserPlus, Mail, Pencil, Trash2, Shield } from 'lucide-react'
+import { UserPlus, Mail, Pencil, Trash2, Shield, User } from 'lucide-react'
 
 const roles = [
   { value: 'admin', label: 'Administrateur' },
@@ -36,16 +36,23 @@ const roles = [
 ]
 
 export function TeamSettings() {
-  const { profile } = useAuth()
+  const { profile, isAdmin, loading: authLoading } = useAuth()
   const [members, setMembers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [isInviteOpen, setIsInviteOpen] = useState(false)
+  const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [selectedMember, setSelectedMember] = useState<any>(null)
-  
 
   const [inviteData, setInviteData] = useState({
     email: '',
+    role: 'user',
+  })
+  const [createData, setCreateData] = useState({
+    email: '',
+    password: '',
+    first_name: '',
+    last_name: '',
     role: 'user',
   })
 
@@ -83,24 +90,82 @@ export function TeamSettings() {
 
     setLoading(true)
     try {
-      const { error } = await supabase.auth.admin.inviteUserByEmail(inviteData.email, {
-        data: {
-          company_id: profile?.company_id,
-          role: inviteData.role,
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) {
+        toast.error('Session expirée. Reconnectez-vous.')
+        setLoading(false)
+        return
+      }
+
+      const res = await fetch('/api/invite-member', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
         },
+        body: JSON.stringify({
+          email: inviteData.email.trim(),
+          role: inviteData.role,
+        }),
       })
 
-      if (error) {
-        toast.error('Cette fonctionnalité nécessite une configuration serveur')
-        console.error(error)
-      } else {
-        toast.success('Invitation envoyée')
-        setIsInviteOpen(false)
-        setInviteData({ email: '', role: 'user' })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        toast.error(json.error || 'Erreur lors de l\'invitation')
+        return
       }
+      toast.success(json.message || 'Invitation envoyée')
+      setIsInviteOpen(false)
+      setInviteData({ email: '', role: 'user' })
+      loadMembers()
     } catch (error: any) {
-      toast.error('Erreur lors de l\'invitation')
+      toast.error(error?.message || 'Erreur lors de l\'invitation')
       console.error(error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!createData.email || !createData.password || createData.password.length < 6) {
+      toast.error('Email et mot de passe (min. 6 caractères) requis.')
+      return
+    }
+    setLoading(true)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) {
+        toast.error('Session expirée. Reconnectez-vous.')
+        setLoading(false)
+        return
+      }
+      const res = await fetch('/api/create-member', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          email: createData.email.trim(),
+          password: createData.password,
+          role: createData.role,
+          first_name: createData.first_name.trim() || undefined,
+          last_name: createData.last_name.trim() || undefined,
+        }),
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        toast.error(json.error || 'Erreur lors de la création du compte')
+        setLoading(false)
+        return
+      }
+      toast.success(json.message || 'Utilisateur créé.')
+      setIsCreateOpen(false)
+      setCreateData({ email: '', password: '', first_name: '', last_name: '', role: 'user' })
+      loadMembers()
+    } catch (err: any) {
+      toast.error(err?.message || 'Erreur lors de la création')
     } finally {
       setLoading(false)
     }
@@ -130,7 +195,7 @@ export function TeamSettings() {
       setSelectedMember(null)
       loadMembers()
     } catch (error: any) {
-      toast.error('Erreur lors de la mise à jour')
+      toast.error(error?.message || 'Erreur lors de la mise à jour')
     } finally {
       setLoading(false)
     }
@@ -157,7 +222,7 @@ export function TeamSettings() {
       toast.success('Membre retiré de l\'équipe')
       loadMembers()
     } catch (error: any) {
-      toast.error('Erreur lors de la suppression')
+      toast.error(error?.message || 'Erreur lors de la suppression')
     }
   }
 
@@ -178,7 +243,17 @@ export function TeamSettings() {
     }
   }
 
-  if (profile?.role !== 'admin') {
+  if (authLoading || !profile) {
+    return (
+      <Card>
+        <CardContent className="py-8 text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#C5A572] mx-auto" />
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (!isAdmin) {
     return (
       <Card>
         <CardContent className="py-8 text-center">
@@ -202,13 +277,23 @@ export function TeamSettings() {
                 Gérer les membres de votre équipe
               </CardDescription>
             </div>
-            <Button
-              onClick={() => setIsInviteOpen(true)}
-              className="bg-[#C5A572] hover:bg-[#B39562] text-white"
-            >
-              <UserPlus className="mr-2 h-4 w-4" />
-              Inviter un membre
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setIsCreateOpen(true)}
+                className="border-[#C5A572] text-[#C5A572] hover:bg-[#C5A572]/10"
+              >
+                <User className="mr-2 h-4 w-4" />
+                Créer un utilisateur
+              </Button>
+              <Button
+                onClick={() => setIsInviteOpen(true)}
+                className="bg-[#C5A572] hover:bg-[#B39562] text-white"
+              >
+                <UserPlus className="mr-2 h-4 w-4" />
+                Inviter un membre
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -338,6 +423,96 @@ export function TeamSettings() {
                 className="bg-[#C5A572] hover:bg-[#B39562] text-white"
               >
                 {loading ? 'Envoi...' : 'Envoyer l\'invitation'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Créer un utilisateur</DialogTitle>
+            <DialogDescription>
+              Créez un compte directement. L&apos;utilisateur pourra se connecter avec cet email et le mot de passe que vous définissez.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleCreateUser} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="create_first_name">Prénom</Label>
+                <Input
+                  id="create_first_name"
+                  value={createData.first_name}
+                  onChange={(e) => setCreateData({ ...createData, first_name: e.target.value })}
+                  placeholder="Jean"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="create_last_name">Nom</Label>
+                <Input
+                  id="create_last_name"
+                  value={createData.last_name}
+                  onChange={(e) => setCreateData({ ...createData, last_name: e.target.value })}
+                  placeholder="Dupont"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="create_email">Email *</Label>
+              <Input
+                id="create_email"
+                type="email"
+                value={createData.email}
+                onChange={(e) => setCreateData({ ...createData, email: e.target.value })}
+                placeholder="nom@exemple.com"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="create_password">Mot de passe (min. 6 caractères) *</Label>
+              <Input
+                id="create_password"
+                type="password"
+                value={createData.password}
+                onChange={(e) => setCreateData({ ...createData, password: e.target.value })}
+                placeholder="••••••••"
+                required
+                minLength={6}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="create_role">Rôle *</Label>
+              <Select
+                value={createData.role}
+                onValueChange={(value) => setCreateData({ ...createData, role: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {roles.map((role) => (
+                    <SelectItem key={role.value} value={role.value}>
+                      {role.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsCreateOpen(false)}
+              >
+                Annuler
+              </Button>
+              <Button
+                type="submit"
+                disabled={loading}
+                className="bg-[#C5A572] hover:bg-[#B39562] text-white"
+              >
+                {loading ? 'Création...' : 'Créer'}
               </Button>
             </div>
           </form>

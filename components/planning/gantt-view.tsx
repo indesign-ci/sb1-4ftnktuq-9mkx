@@ -164,14 +164,9 @@ export function GanttView({
         ref={topScrollRef}
         className="h-3 overflow-x-auto overflow-y-hidden border-b border-gray-100 bg-gray-50/70"
         onScroll={(e) => {
-          if (mainScrollRef.current) {
-            mainScrollRef.current.scrollLeft = e.currentTarget.scrollLeft
-          }
-        }}
-        onScroll={(e) => {
-          if (topScrollRef.current) {
-            topScrollRef.current.scrollLeft = e.currentTarget.scrollLeft
-          }
+          const { scrollLeft } = e.currentTarget
+          if (mainScrollRef.current) mainScrollRef.current.scrollLeft = scrollLeft
+          if (topScrollRef.current) topScrollRef.current.scrollLeft = scrollLeft
         }}
       >
         <div style={{ width: totalWidth + 280 }} />

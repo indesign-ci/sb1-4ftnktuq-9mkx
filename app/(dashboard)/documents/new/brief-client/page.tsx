@@ -214,8 +214,8 @@ export default function BriefClientPage() {
         if (error) throw error
         toast.success('Brouillon enregistré')
       }
-    } catch {
-      toast.error('Erreur lors de la sauvegarde')
+    } catch (e: any) {
+      toast.error(e?.message || 'Erreur lors de la sauvegarde')
     } finally {
       setIsSaving(false)
     }
@@ -308,8 +308,8 @@ export default function BriefClientPage() {
         sections,
       })
       toast.success('PDF généré')
-    } catch {
-      toast.error('Erreur génération PDF')
+    } catch (err: any) {
+      toast.error(err?.message || 'Erreur génération PDF')
     }
   }
 
@@ -330,8 +330,8 @@ export default function BriefClientPage() {
       }
       update('photoUrls', [...form.photoUrls, ...urls])
       toast.success('Photo(s) ajoutée(s)')
-    } catch {
-      toast.error('Erreur upload')
+    } catch (err: any) {
+      toast.error(err?.message || 'Erreur upload')
     } finally {
       setUploading(false)
       e.target.value = ''

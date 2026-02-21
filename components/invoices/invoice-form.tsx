@@ -36,12 +36,13 @@ type InvoiceLine = {
 
 type InvoiceFormProps = {
   invoiceId?: string
+  defaultClientId?: string
   onSuccess: () => void
 }
 
 const UNITS = ['m²', 'ml', 'u', 'forfait', 'h']
 
-export function InvoiceForm({ invoiceId, onSuccess }: InvoiceFormProps) {
+export function InvoiceForm({ invoiceId, defaultClientId, onSuccess }: InvoiceFormProps) {
   const { profile } = useAuth()
   const [loading, setLoading] = useState(false)
   const [clients, setClients] = useState<any[]>([])
@@ -72,6 +73,12 @@ export function InvoiceForm({ invoiceId, onSuccess }: InvoiceFormProps) {
       loadInvoice()
     }
   }, [invoiceId])
+
+  useEffect(() => {
+    if (defaultClientId && !invoiceId && !formData.client_id) {
+      setFormData((prev) => ({ ...prev, client_id: defaultClientId }))
+    }
+  }, [defaultClientId, invoiceId])
 
   useEffect(() => {
     if (formData.client_id) {
@@ -360,7 +367,7 @@ export function InvoiceForm({ invoiceId, onSuccess }: InvoiceFormProps) {
       toast.success(invoiceId ? 'Facture modifiée' : 'Facture créée')
       onSuccess()
     } catch (error: any) {
-      toast.error('Erreur lors de la sauvegarde')
+      toast.error(error?.message || 'Erreur lors de la sauvegarde')
       console.error(error)
     } finally {
       setLoading(false)

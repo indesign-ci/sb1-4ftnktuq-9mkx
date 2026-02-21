@@ -41,7 +41,7 @@ const categories = [
 ]
 
 export default function LibraryPage() {
-  const { profile } = useAuth()
+  const { profile, loading: authLoading } = useAuth()
   const [materials, setMaterials] = useState<any[]>([])
   const [filteredMaterials, setFilteredMaterials] = useState<any[]>([])
   const [suppliers, setSuppliers] = useState<any[]>([])
@@ -102,9 +102,11 @@ export default function LibraryPage() {
   }
 
   useEffect(() => {
+    if (authLoading) return
+    setLoading(true)
     loadMaterials()
     loadSuppliers()
-  }, [])
+  }, [authLoading, profile?.company_id])
 
   useEffect(() => {
     filterMaterials()

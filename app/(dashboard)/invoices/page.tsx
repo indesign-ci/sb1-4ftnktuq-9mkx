@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
 import { supabase } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -81,6 +82,7 @@ const typeLabels: Record<string, string> = {
 }
 
 export default function InvoicesPage() {
+  const searchParams = useSearchParams()
   const { profile } = useAuth()
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [loading, setLoading] = useState(true)
@@ -92,6 +94,12 @@ export default function InvoicesPage() {
   const [isDetailOpen, setIsDetailOpen] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isPaymentOpen, setIsPaymentOpen] = useState(false)
+
+  const defaultClientIdFromUrl = searchParams.get('client_id') || undefined
+
+  useEffect(() => {
+    if (defaultClientIdFromUrl) setIsCreateOpen(true)
+  }, [defaultClientIdFromUrl])
 
   const loadInvoices = async () => {
     try {
@@ -112,8 +120,8 @@ export default function InvoicesPage() {
 
       if (error) throw error
       setInvoices(data || [])
-    } catch {
-      toast.error('Erreur lors du chargement des factures')
+    } catch (err: any) {
+      toast.error(err?.message || 'Erreur lors du chargement des factures')
     } finally {
       setLoading(false)
     }
@@ -131,8 +139,8 @@ export default function InvoicesPage() {
       if (error) throw error
       toast.success('Facture supprimée')
       loadInvoices()
-    } catch {
-      toast.error('Erreur lors de la suppression')
+    } catch (err: any) {
+      toast.error(err?.message || 'Erreur lors de la suppression')
     }
   }
 
@@ -167,8 +175,8 @@ export default function InvoicesPage() {
         .eq('id', id)
 
       if (updateError) throw updateError
-    } catch {
-      // Status update failed silently; list will refresh on next load
+    } catch (err: any) {
+      toast.error(err?.message || 'Erreur lors de la mise à jour du statut')
     }
   }
 
@@ -212,6 +220,7 @@ export default function InvoicesPage() {
               </DialogDescription>
             </DialogHeader>
             <InvoiceForm
+              defaultClientId={defaultClientIdFromUrl}
               onSuccess={() => {
                 setIsCreateOpen(false)
                 loadInvoices()

@@ -99,7 +99,7 @@ export default function AttestationFinTravauxPage() {
       router.push('/documents-pro')
     } catch (e) {
       console.error(e)
-      toast.error('Erreur lors de la sauvegarde')
+      toast.error(e?.message || 'Erreur lors de la sauvegarde')
     } finally {
       setIsSaving(false)
     }
@@ -126,7 +126,7 @@ export default function AttestationFinTravauxPage() {
         documentNumber: generateDocumentNumber(),
         documentTitle: 'Attestation de fin de travaux',
         documentDate: new Date(formData.date),
-        company: { name: company?.name },
+        company: { name: company?.name ?? '' },
         client: { name: clientName },
         projectName: selectedProject.name,
         sections,

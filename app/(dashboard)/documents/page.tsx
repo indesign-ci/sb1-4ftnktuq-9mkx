@@ -90,8 +90,8 @@ export default function DocumentsPage() {
       const { data, error } = await query
       if (error) throw error
       setDocuments(data || [])
-    } catch {
-      toast.error('Erreur chargement documents')
+    } catch (err: any) {
+      toast.error(err?.message || 'Erreur chargement documents')
     } finally {
       setLoading(false)
     }
@@ -106,8 +106,8 @@ export default function DocumentsPage() {
       ])
       if (cRes.data) setClients(cRes.data)
       if (pRes.data) setProjects(pRes.data)
-    } catch {
-      toast.error('Impossible de charger les données')
+    } catch (err: any) {
+      toast.error(err?.message || 'Impossible de charger les données')
     }
   }
 
@@ -134,8 +134,8 @@ export default function DocumentsPage() {
       if (error) throw error
       toast.success('Document supprimé')
       loadDocuments()
-    } catch {
-      toast.error('Erreur suppression')
+    } catch (err: any) {
+      toast.error(err?.message || 'Erreur suppression')
     }
   }
 

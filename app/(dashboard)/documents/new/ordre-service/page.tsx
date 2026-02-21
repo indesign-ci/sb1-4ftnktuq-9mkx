@@ -109,7 +109,7 @@ export default function OrdreServicePage() {
       router.push('/documents-pro')
     } catch (e) {
       console.error(e)
-      toast.error('Erreur lors de la sauvegarde')
+      toast.error(e?.message || 'Erreur lors de la sauvegarde')
     } finally {
       setIsSaving(false)
     }
@@ -153,7 +153,7 @@ export default function OrdreServicePage() {
         documentNumber: generateDocumentNumber(),
         documentTitle: 'Ordre de service / Démarrage chantier',
         documentDate: new Date(formData.date),
-        company: { name: company?.name, address: company?.address, phone: company?.phone, email: company?.email },
+        company: { name: company?.name ?? '', address: company?.address, phone: company?.phone, email: company?.email },
         client: { name: clientName },
         projectName: selectedProject.name,
         sections,

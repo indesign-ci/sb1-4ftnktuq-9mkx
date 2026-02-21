@@ -1,6 +1,28 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
+/** Extrait le "ref" du projet depuis l'URL Supabase (ex: ihkblyjtspanwkeacftp). */
+function getProjectRefFromUrl(supabaseUrl: string): string | null {
+  try {
+    const u = new URL(supabaseUrl)
+    return u.hostname.replace('.supabase.co', '') || null
+  } catch {
+    return null
+  }
+}
+
+/** Extrait le "ref" du projet depuis le JWT (payload.ref). */
+function getProjectRefFromServiceKey(serviceKey: string): string | null {
+  try {
+    const parts = serviceKey.split('.')
+    if (parts.length !== 3) return null
+    const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'))
+    return (payload.ref as string) || null
+  } catch {
+    return null
+  }
+}
+
 /**
  * Crée le premier compte Admin (quand aucun admin n'existe).
  * Utilise SUPABASE_SERVICE_ROLE_KEY pour bypass RLS.
@@ -14,6 +36,17 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: 'Configuration manquante (SUPABASE_SERVICE_ROLE_KEY)' },
         { status: 500 }
+      )
+    }
+
+    const urlRef = getProjectRefFromUrl(url)
+    const keyRef = getProjectRefFromServiceKey(serviceKey)
+    if (urlRef && keyRef && urlRef !== keyRef) {
+      return NextResponse.json(
+        {
+          error: `La clé service_role ne correspond pas au projet. Votre URL pointe vers le projet "${urlRef}", mais la clé est pour le projet "${keyRef}". Dans Supabase Dashboard, ouvrez le projet ${urlRef} (${url}), allez dans Settings > API et copiez la clé "service_role" de ce projet dans .env (SUPABASE_SERVICE_ROLE_KEY).`,
+        },
+        { status: 400 }
       )
     }
 

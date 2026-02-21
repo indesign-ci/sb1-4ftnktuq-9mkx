@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -15,6 +15,8 @@ import { APP_NAME, APP_VERSION } from '@/lib/app-config'
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirect = searchParams.get('redirect')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(false)
@@ -23,15 +25,18 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (authLoading) return
-    if (user) router.replace('/dashboard')
-  }, [user, authLoading, router])
+    if (user) {
+      const target = redirect && redirect.startsWith('/') ? redirect : '/dashboard'
+      router.replace(target)
+    }
+  }, [user, authLoading, router, redirect])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 
     try {
-      await signIn(email, password)
+      await signIn(email, password, redirect ?? undefined)
       toast.success('Connexion réussie')
     } catch (error: unknown) {
       toast.error(error instanceof Error ? error.message : 'Erreur de connexion')
@@ -56,7 +61,7 @@ export default function LoginPage() {
         </div>
         <div className="absolute bottom-12 left-12 right-12 z-10">
           <p className="text-white text-xl md:text-2xl italic font-light leading-relaxed">
-            "Le luxe, c'est quand le détail rejoint l'excellence."
+            {`"Le luxe, c'est quand le détail rejoint l'excellence."`}
           </p>
         </div>
       </div>
@@ -191,8 +196,9 @@ export default function LoginPage() {
               type="button"
               variant="outline"
               className="w-full border-[#C5A572] text-[#C5A572] hover:bg-[#C5A572]/5 py-3.5 rounded-lg font-medium transition-all duration-200"
+              asChild
             >
-              Accéder au portail client
+              <Link href="/client">Accéder au portail client</Link>
             </Button>
           </form>
 

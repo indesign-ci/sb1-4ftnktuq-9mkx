@@ -10,8 +10,8 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['var(--font-inter)', 'Inter', 'sans-serif'],
-        serif: ['Cormorant Garamond', 'serif'],
+        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
+        serif: ['var(--font-playfair)', 'Georgia', 'serif'],
         heading: ['var(--font-playfair)', 'Playfair Display', 'Georgia', 'serif'],
         body: ['var(--font-inter)', 'Inter', 'system-ui', 'sans-serif'],
       },
@@ -19,6 +19,9 @@ const config: Config = {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic':
           'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+        'gradient-luxe': 'linear-gradient(135deg, #1A1A1A 0%, #2D2A26 50%, #1A1A1A 100%)',
+        'gradient-or': 'linear-gradient(135deg, #C8A97E 0%, #E8D5B5 50%, #C8A97E 100%)',
+        'gradient-subtle': 'linear-gradient(180deg, #FFFDF9 0%, #F8F5F0 100%)',
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -26,6 +29,25 @@ const config: Config = {
         sm: 'calc(var(--radius) - 4px)',
       },
       colors: {
+        luxe: {
+          50: '#FFFDF9',
+          100: '#F8F5F0',
+          200: '#F0EBE3',
+          300: '#E8E0D5',
+          400: '#D4C5B0',
+          500: '#C8A97E',
+          600: '#B8956A',
+          700: '#A68B5B',
+          800: '#8C7E6F',
+          900: '#6B6159',
+          950: '#1A1A1A',
+        },
+        or: {
+          DEFAULT: '#C8A97E',
+          light: '#E8D5B5',
+          dark: '#A68B5B',
+          muted: '#D4C5B0',
+        },
         gold: {
           '50': '#FBF8F1',
           '100': '#F5EFE4',
@@ -92,10 +114,14 @@ const config: Config = {
         },
       },
       boxShadow: {
-        'gold': '0 4px 14px rgba(197,165,114,0.15)',
+        gold: '0 4px 14px rgba(197,165,114,0.15)',
         'gold-hover': '0 8px 25px rgba(197,165,114,0.25)',
-        'soft': '0 2px 15px rgba(0,0,0,0.04)',
-        'card': '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)',
+        soft: '0 2px 15px rgba(0,0,0,0.04)',
+        luxe: '0 4px 30px rgba(200, 169, 126, 0.08)',
+        'luxe-lg': '0 10px 60px rgba(200, 169, 126, 0.12)',
+        'luxe-xl': '0 20px 80px rgba(200, 169, 126, 0.15)',
+        card: '0 1px 3px rgba(0,0,0,0.04), 0 4px 20px rgba(0,0,0,0.03)',
+        'card-hover': '0 4px 12px rgba(0,0,0,0.06), 0 12px 40px rgba(0,0,0,0.06)',
       },
       keyframes: {
         'accordion-down': {
@@ -124,6 +150,22 @@ const config: Config = {
             transform: 'translateY(0)',
           },
         },
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        slideUp: {
+          '0%': { opacity: '0', transform: 'translateY(20px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        shimmer: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-10px)' },
+        },
         'scale-in': {
           from: {
             opacity: '0',
@@ -138,7 +180,10 @@ const config: Config = {
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
-        'fade-in': 'fade-in 0.3s ease-out',
+        'fade-in': 'fadeIn 0.6s ease-out',
+        'slide-up': 'slideUp 0.6s ease-out',
+        shimmer: 'shimmer 2s infinite linear',
+        float: 'float 6s ease-in-out infinite',
         'scale-in': 'scale-in 0.2s ease-out',
       },
     },

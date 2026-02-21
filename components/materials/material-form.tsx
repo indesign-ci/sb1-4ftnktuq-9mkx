@@ -199,7 +199,7 @@ export function MaterialForm({ materialId, onSuccess, onCancel }: MaterialFormPr
 
       onSuccess()
     } catch (error: any) {
-      toast.error('Erreur lors de la sauvegarde')
+      toast.error(error?.message || 'Erreur lors de la sauvegarde')
       console.error(error)
     } finally {
       setLoading(false)

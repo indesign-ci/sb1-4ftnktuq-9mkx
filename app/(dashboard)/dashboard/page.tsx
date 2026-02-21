@@ -29,13 +29,14 @@ interface DashboardData {
 }
 
 export default function DashboardPage() {
-  const { profile } = useAuth()
+  const { profile, loading: authLoading } = useAuth()
   const [loading, setLoading] = useState(true)
   const [data, setData] = useState<DashboardData | null>(null)
 
   useEffect(() => {
+    if (authLoading) return
     loadDashboardData()
-  }, [])
+  }, [authLoading, profile?.company_id])
 
   const loadDashboardData = async () => {
     try {
@@ -79,14 +80,14 @@ export default function DashboardPage() {
       const paidInvoices = invoices.filter(inv => inv.status === 'paid')
       const currentMonthRevenue = paidInvoices
         .filter(inv => {
-          const paidDate = inv.updated_at
+          const paidDate = inv.updated_at ?? ''
           return paidDate >= firstDayCurrentMonth && paidDate < firstDayNextMonth
         })
         .reduce((sum, inv) => sum + (inv.total_ttc || 0), 0)
 
       const previousMonthRevenue = paidInvoices
         .filter(inv => {
-          const paidDate = inv.updated_at
+          const paidDate = inv.updated_at ?? ''
           return paidDate >= firstDayPreviousMonth && paidDate < firstDayCurrentMonth
         })
         .reduce((sum, inv) => sum + (inv.total_ttc || 0), 0)
@@ -110,7 +111,7 @@ export default function DashboardPage() {
         const monthEnd = new Date(currentYear, i + 1, 1).toISOString()
         const revenue = paidInvoices
           .filter(inv => {
-            const paidDate = inv.updated_at
+            const paidDate = inv.updated_at ?? ''
             return paidDate >= monthStart && paidDate < monthEnd
           })
           .reduce((sum, inv) => sum + (inv.total_ttc || 0), 0)
@@ -140,12 +141,14 @@ export default function DashboardPage() {
       }))
 
       const recentProjects = projects
-        .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+        .sort((a, b) => new Date((b.updated_at ?? 0) as string).getTime() - new Date((a.updated_at ?? 0) as string).getTime())
         .slice(0, 5)
         .map(p => ({
           id: p.id,
           name: p.name,
-          client_name: p.clients ? `${p.clients.first_name} ${p.clients.last_name}` : 'Client inconnu',
+          client_name: p.clients && typeof p.clients === 'object' && 'first_name' in p.clients && 'last_name' in p.clients
+            ? `${(p.clients as { first_name?: string; last_name?: string }).first_name} ${(p.clients as { first_name?: string; last_name?: string }).last_name}`
+            : 'Client inconnu',
           current_phase: p.current_phase || 'Non défini',
           progress: p.progress || 0,
           budget: p.budget || 0,
@@ -161,7 +164,7 @@ export default function DashboardPage() {
         ...invoices.filter(i => i.status === 'paid').slice(0, 3).map(i => ({
           id: i.id,
           type: 'payment' as const,
-          description: `Paiement de ${new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XAF' }).format(i.total_ttc)} reçu`,
+          description: `Paiement de ${new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XAF' }).format(i.total_ttc ?? 0)} reçu`,
           created_at: i.updated_at,
         })),
         ...projects.slice(0, 2).map(p => ({
@@ -171,7 +174,7 @@ export default function DashboardPage() {
           created_at: p.updated_at,
         })),
       ]
-        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .sort((a, b) => new Date((b.created_at ?? 0) as string).getTime() - new Date((a.created_at ?? 0) as string).getTime())
         .slice(0, 10)
 
       const upcomingEvents = events.map(e => ({
@@ -285,7 +288,11 @@ export default function DashboardPage() {
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="mb-1 text-2xl font-serif text-anthracite-800">
-            Bonjour, Sophie 👋
+            Bonjour, {profile?.first_name || profile?.last_name
+              ? [profile.first_name, profile.last_name].filter(Boolean).join(' ')
+              : profile?.role === 'admin'
+                ? 'Admin'
+                : profile?.email?.split('@')[0] || 'Bienvenue'} 👋
           </h1>
           <p className="text-gray-500">Voici un résumé de votre activité</p>
         </div>

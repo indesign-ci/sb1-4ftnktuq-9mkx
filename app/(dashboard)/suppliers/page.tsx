@@ -20,7 +20,7 @@ import { SupplierForm } from '@/components/suppliers/supplier-form'
 import { SupplierDetail } from '@/components/suppliers/supplier-detail'
 
 export default function SuppliersPage() {
-  const { profile } = useAuth()
+  const { profile, loading: authLoading } = useAuth()
   const [suppliers, setSuppliers] = useState<any[]>([])
   const [filteredSuppliers, setFilteredSuppliers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -56,8 +56,9 @@ export default function SuppliersPage() {
   }
 
   useEffect(() => {
+    if (authLoading) return
     loadSuppliers()
-  }, [])
+  }, [authLoading, profile?.company_id])
 
   useEffect(() => {
     filterSuppliers()

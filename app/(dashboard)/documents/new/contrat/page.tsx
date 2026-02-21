@@ -139,7 +139,7 @@ export default function ContratMaitriseOeuvrePage() {
       router.push('/documents-pro')
     } catch (e) {
       console.error(e)
-      toast.error('Erreur lors de la sauvegarde')
+      toast.error(e?.message || 'Erreur lors de la sauvegarde')
     } finally {
       setIsSaving(false)
     }
@@ -183,7 +183,7 @@ export default function ContratMaitriseOeuvrePage() {
         documentNumber: generateDocumentNumber(),
         documentTitle: "Contrat de Maîtrise d'Œuvre",
         documentDate: new Date(formData.date),
-        company: { name: company?.name, address: company?.address, phone: company?.phone, email: company?.email },
+        company: { name: company?.name ?? '', address: company?.address, phone: company?.phone, email: company?.email },
         client: {
           name: `${selectedClient.first_name} ${selectedClient.last_name}`,
           address: selectedClient.address,

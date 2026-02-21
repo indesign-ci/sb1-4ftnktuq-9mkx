@@ -20,13 +20,16 @@ import {
   FileCheck,
   Settings,
   LogOut,
-  Building2,
   Package,
   ClipboardList,
+  UserCircle,
+  LayoutGrid,
 } from 'lucide-react'
 
 const navigation = [
   { name: 'Tableau de bord', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Portail client', href: '/client', icon: UserCircle },
+  { name: 'Conception', href: '/conception', icon: LayoutGrid },
   { name: 'Clients', href: '/clients', icon: Users },
   { name: 'Projets', href: '/projects', icon: FolderKanban },
   { name: 'Devis', href: '/quotes', icon: FileText },

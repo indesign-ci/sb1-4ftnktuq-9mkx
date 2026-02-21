@@ -203,7 +203,7 @@ export function ProjectForm({ project, onSuccess, onCancel }: ProjectFormProps) 
       const projectData = {
         company_id: profile?.company_id,
         name: formData.name,
-        client_id: formData.client_id,
+        client_id: formData.client_id || null,
         address: formData.address || null,
         city: formData.city || null,
         postal_code: formData.postal_code || null,
@@ -211,15 +211,15 @@ export function ProjectForm({ project, onSuccess, onCancel }: ProjectFormProps) 
         surface_area: formData.surface_area ? parseFloat(formData.surface_area) : null,
         style: formData.style || null,
         budget_estimated: formData.budget_estimated ? parseFloat(formData.budget_estimated) : 0,
-        budget_spent: 0,
+        budget_spent: project?.budget_spent ?? 0,
         start_date: formData.start_date || null,
         deadline: formData.deadline || null,
         architect_id: formData.architect_id || null,
         description: formData.description || null,
-        cover_image_url: coverUrl,
-        status: 'active',
-        current_phase: 'brief',
-        progress: 0,
+        cover_image_url: coverUrl || null,
+        status: (project?.status && project.status !== 'active') ? project.status : 'in_progress',
+        current_phase: project?.current_phase || 'brief',
+        progress: project?.progress ?? 0,
         updated_at: new Date().toISOString(),
       }
 
@@ -256,7 +256,8 @@ export function ProjectForm({ project, onSuccess, onCancel }: ProjectFormProps) 
 
       onSuccess()
     } catch (error: any) {
-      toast.error('Erreur lors de la sauvegarde')
+      const message = error?.message || error?.error_description || 'Erreur lors de la sauvegarde'
+      toast.error(message)
       console.error(error)
     } finally {
       setLoading(false)
